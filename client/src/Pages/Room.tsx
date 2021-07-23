@@ -92,14 +92,18 @@ const Room = () =>{
 export default Room;
 
 async function connect() {
-
-    await connectSocket();
+    
+    await connectSocket().catch(error => {
+        console.log(error);
+        return;
+    });
+    
 
     const data: mediaSoupTypes.RtpCapabilities = await sendRequest('getRouterRtpCapabilities', {});
     console.log('getRouterRtpCapabilities:', data);
     await loadDevice(data);
-
     
+
 
     async function loadDevice(routerRtpCapabilities : mediaSoupTypes.RtpCapabilities) {
         try {
@@ -127,8 +131,9 @@ function connectSocket() {
             transports: ['websocket'],
         };
 
+        
         socket = io(serverUrl, opts);
-
+        
         socket.on('connect', ()=>{
             console.log('socket-client connected!');
         })
@@ -142,15 +147,14 @@ function connectSocket() {
             console.log('socket.io disconnect:', evt);
         });
 
-        socket.on('message', (message:any)=>{
-            console.log('socket.io message:', message);
-            if (message.type === 'welcome') {
+        socket.on('socketConnection-finish', (message: {type: string, id: any})=>{
+            console.log('socketConnection-finish', message);
+            if (message.type === 'finish') {
                 if (socket.id !== message.id) {
-                console.warn('WARN: something wrong with clientID', socket.io, message.id);
+                    console.warn('WARN: socket-client != socket-server', socket.io, message.id);
                 }
-
-                let clientId = message.id;
-                console.log('connected to server. clientId=' + clientId);
+   
+                console.log('connected to server. clientId=' + message.id);
                 resolve(null);
             }
             else {
