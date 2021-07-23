@@ -1,0 +1,54 @@
+<div>
+    <div>
+        <input
+            disabled={isStartMedia}
+            onChange={handleUseVideo}
+            type='checkbox'
+            checked={useVideo}
+        ></input>
+        <label>video</label>
+    </div>
+    <div>
+        <input
+            disabled={isStartMedia}
+            onChange={handleUseAudio}
+            type='checkbox'
+            checked={useAudio}
+        ></input>
+        <label>audio</label>
+    </div>
+    <button disabled={isStartMedia} onClick={handleStartMedia}>
+        Start Media
+    </button>
+    <button
+        disabled={!isStartMedia || isPublished}
+        onClick={handleStopMedia}
+    >
+        Stop Media
+    </button>
+
+    <button
+        disabled={isPublished || !isStartMedia}
+        onClick={handlePublish}
+    >
+        publish
+    </button>
+    <button
+        disabled={!isPublished || !isStartMedia}
+        onClick={handleDisconnect}
+    >
+        Disconnect
+    </button>
+    <div>
+        local video
+        <video
+            ref={localVideo}
+            autoPlay
+            style={{
+                width: '240px',
+                height: '180px',
+                border: '1px solid black',
+            }}
+        ></video>
+    </div>
+</div>
