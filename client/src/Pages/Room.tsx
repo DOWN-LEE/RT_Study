@@ -84,7 +84,10 @@ const Room = () => {
 
 
 
+    const videoOnClick2 = () => {
 
+        console.log(subVideos);
+    }
 
 
 
@@ -97,6 +100,7 @@ const Room = () => {
     return (
         <Container>
             <button onClick={videoOnClick} disabled={!connectReady}>ho</button>
+            <button onClick={videoOnClick2} disabled={!connectReady}>seo</button>
             <video
                 controls
                 style={{
@@ -202,6 +206,32 @@ const Room = () => {
                 }
             });
 
+            socket.on('newProducer', function (message: any) {
+                console.log('socket.io newProducer:', message);
+                const remoteId = message.socketId;
+                const prdId = message.producerId;
+                const kind = message.kind;
+                if (kind === 'video') {
+                    console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
+                    consumeAdd(consumerTransport, remoteId, prdId, kind);
+                }
+                else if (kind === 'audio') {
+                    //console.warn('-- audio NOT SUPPORTED YET. skip remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
+                    console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
+                    consumeAdd(consumerTransport, remoteId, prdId, kind);
+                }
+            });
+
+            socket.on('producerClosed', function (message: any) {
+                console.log('socket.io producerClosed:', message);
+                const localId = message.localId;
+                const producereId = message.producereId;
+                const kind = message.kind;
+                console.log('--try removeConsumer remoteId=%s, localId=%s, track=%s', producereId, localId, kind);
+                removeConsumer(producereId, kind);
+                removeRemoteVideo(producereId);
+            })
+
         })
     }
 
@@ -293,6 +323,13 @@ const Room = () => {
         addSubVideo(producerSocketId, consumer.track, kind);
         addConsumer(producerSocketId, consumer, kind);
 
+        consumer.on("producerclose", () => {
+            console.log('--consumer producer closed. remoteId=' + consumer.producerId);
+            consumer.close();
+            removeConsumer(producerId, kind);
+            removeRemoteVideo(consumer.producerId);
+        });
+
 
         if (kind === 'video') {
             console.log('--try resumeAdd --');
@@ -308,6 +345,30 @@ const Room = () => {
 
     }
 
+
+    function removeConsumer(id: any, kind: any) {
+        if (kind === 'video') {
+            delete videoConsumers[id];
+            console.log('videoConsumers count=' + Object.keys(videoConsumers).length);
+        }
+        else if (kind === 'audio') {
+            delete audioConsumers[id];
+            console.log('audioConsumers count=' + Object.keys(audioConsumers).length);
+        }
+        else {
+            console.warn('UNKNOWN consumer kind=' + kind);
+        }
+    }
+
+    function removeRemoteVideo(id: any) {
+        console.log(' ---- removeRemoteVideo() id=' + id);
+        
+        setSubVideos((subVideos) => (subVideos.filter(item => item.id !== id)));
+       
+       
+       
+        
+    }
 
 
 

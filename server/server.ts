@@ -30,10 +30,8 @@ io.on('connection', (socket : any)=>{
     
     socket.on('disconnect', ()=>{
         console.log('client disconnected. socket id=' + socket.id);
-
-        /*
-        TODO
-        */
+        cleanUpPeer(socket);
+       
     })
 
     socket.on('getRouterRtpCapabilities', (data : any, callback : any) => {
@@ -439,3 +437,64 @@ function removeConsumer(localId: any, producereId: any, kind: string) {
     }
 }
 
+
+function cleanUpPeer(socket: any) {
+    const id = socket.id;
+    removeConsumerSetDeep(id);
+    /*
+    const consumer = getConsumer(id);
+    if (consumer) {
+      consumer.close();
+      removeConsumer(id);
+    }
+    */
+  
+    const transport = getConsumerTransport(id);
+    if (transport) {
+      transport.close();
+      removeConsumerTransport(id);
+    }
+  
+    const videoProducer = getProducer(id, 'video');
+    if (videoProducer) {
+      videoProducer.close();
+      removeProducer(id, 'video');
+    }
+    const audioProducer = getProducer(id, 'audio');
+    if (audioProducer) {
+      audioProducer.close();
+      removeProducer(id, 'audio');
+    }
+  
+    const producerTransport = getProducerTrasnport(id);
+    if (producerTransport) {
+      producerTransport.close();
+      removeProducerTransport(id);
+    }
+  }
+
+function removeConsumerSetDeep(localId: any) {
+    const set = getConsumerSet(localId, 'video');
+    delete videoConsumers[localId];
+    if (set) {
+        for (const key in set) {
+            const consumer = set[key];
+            consumer.close();
+            delete set[key];
+        }
+
+        console.log('removeConsumerSetDeep video consumers count=' + Object.keys(set).length);
+    }
+
+    const audioSet = getConsumerSet(localId, 'audio');
+    delete audioConsumers[localId];
+    if (audioSet) {
+        for (const key in audioSet) {
+            const consumer = audioSet[key];
+            consumer.close();
+            delete audioSet[key];
+        }
+
+        console.log('removeConsumerSetDeep audio consumers count=' + Object.keys(audioSet).length);
+    }
+}
