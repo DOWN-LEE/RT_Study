@@ -48,7 +48,7 @@ io.on('connection', (socket : any)=>{
 
 
     // producer
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~*/
+    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     socket.on('createProducerTransport', async (data: any, callback: any) => {
         const { transport, params } = await createTransport();
         addProducerTrasport(socket.id, transport);
@@ -96,7 +96,9 @@ io.on('connection', (socket : any)=>{
         socket.broadcast.emit('newProducer', { socketId: id, producerId: producer.id, kind: producer.kind });
     });
 
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     // consumer
     socket.on('createConsumerTransport', async(data: any, callback: any) => {
         console.log('create consumer transport. socket id=' + socket.id);
@@ -174,7 +176,7 @@ io.on('connection', (socket : any)=>{
         let consumer = getConsumer(localId, producerId, kind);
         if (!consumer) {
             console.error('consumer NOT EXIST for remoteId=' + producerId);
-            return;
+            callback(null, 'consumer NOT EXIST for remoteId=' + producerId);
         }
         await consumer.resume();
         callback({}, null);
@@ -213,7 +215,7 @@ const mediaCodecs: any =
 const WebRtcTransportOptions: mediaSoupTypes.WebRtcTransportOptions =
 {
     listenIps: [
-      { ip: '127.0.0.1', announcedIp: 'null' }
+      { ip: '127.0.0.1', announcedIp: '127.0.0.1' }
     ],
     enableUdp: true,
     enableTcp: true,
@@ -370,6 +372,7 @@ function addConsumerSet(localId: any, set: any, kind: string) {
 
 
 function getConsumer(localId: any, remoteId: any, kind: string) {
+    
     const set = getConsumerSet(localId, kind);
     if (set) {
         return set[remoteId];
@@ -421,7 +424,7 @@ function addConsumer(localId: any, producerId: any, consumer: mediaSoupTypes.Con
     else{
         const newSet: any = {};
         newSet[producerId] = consumer;
-        addConsumerSet(producerId, newSet, kind);
+        addConsumerSet(localId, newSet, kind);
     }
 }
 

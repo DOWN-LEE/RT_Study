@@ -4,7 +4,7 @@ import { Device, types as mediaSoupTypes } from 'mediasoup-client';
 import io from 'socket.io-client';
 
 import { VideoOn } from './Publish';
-
+import Video from './Video';
 import { publishDataType } from './@type/index';
 import { userInfo } from 'node:os';
 
@@ -35,17 +35,18 @@ let device: mediaSoupTypes.Device;
 let videoConsumers: any = {};
 let audioConsumers: any = {};
 
+let mediaStreams: any = {};
 
 
-const Room = () =>{
+const Room = () => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
 
     const [status, setStatus] = useState('Hi');
     const [connectReady, setConnectReady] = useState(false);
-    const [subVideos, setSubVideos] = useState([]);
-    
-    
+    const [subVideos, setSubVideos] = useState<Array<any>>([]);
+
+
 
     const videoOnClick = () => {
 
@@ -63,7 +64,7 @@ const Room = () =>{
 
 
     // join
-    useEffect(()=>{
+    useEffect(() => {
 
         con();
 
@@ -71,34 +72,33 @@ const Room = () =>{
             await connect();
             setConnectReady(true);
         }
-        
-    },[]);
+
+    }, []);
 
 
-    useEffect(()=>{
-        if(connectReady)
+    useEffect(() => {
+        if (connectReady)
             subscribe();
-    },[connectReady])
-
-    
+    }, [connectReady])
 
 
 
 
 
 
-    
-
-    
 
 
 
 
-  
-    return(
+
+
+
+
+    return (
         <Container>
             <button onClick={videoOnClick} disabled={!connectReady}>ho</button>
             <video
+                controls
                 style={{
                     width: 240,
                     height: 240,
@@ -106,243 +106,255 @@ const Room = () =>{
                     backgroundColor: 'pink'
                 }}
                 ref={localVideoRef}
-                >
+            >
             </video>
 
-            {subVideos.map((videoinfo, index) => (
-                <video
-                style={{
-                    width: 240,
-                    height: 240,
-                    margin: 5,
-                    backgroundColor: 'pink'
-                }}
-                ref={videoinfo}
-                key={index}
-                >
-                </video>
-            ))}
+            {subVideos.map((videoinfo, index) => {
+                return (
+                    <Video
+                        key={index}
+                        keys={index}
+                        stream={videoinfo.stream}
+                        id={videoinfo.id}
+                    />
+                )})
+            }
 
             <h1>{status}</h1>
 
         </Container>
 
     )
-}
-
-export default Room;
-
-async function connect() {
-    
-    await connectSocket().catch(error => {
-        console.log(error);
-        return;
-    });
-    
-
-    const data: mediaSoupTypes.RtpCapabilities = await sendRequest('getRouterRtpCapabilities', {});
-    console.log('getRouterRtpCapabilities:', data);
-    await loadDevice(data);
-    
 
 
 
 
-    async function loadDevice(routerRtpCapabilities : mediaSoupTypes.RtpCapabilities) {
-        try {
-            device = new Device();
-        } catch (error : any) {
-            if (error.name === 'UnsupportedError') {
-                console.error('browser not supported');
-            }
-        }
-        await device.load({ routerRtpCapabilities });
-    }
-    
-}
+    async function connect() {
 
-function connectSocket() {
-    if (socket) {
-        socket.close();
-        socket = null;
-    }
-
-    return new Promise((resolve, reject) => {
-        const serverUrl = `http://${hostname}:${hostport}`;
-        const opts = {
-            path: '/server',
-            transports: ['websocket'],
-        };
-
-        socket = io(serverUrl, opts);
-
-        socket.on('connect', () => {
-            console.log('socket-client connected!');
-        })
-
-        socket.on('error', (err: any) => {
-            console.error('socket.io ERROR:', err);
-            reject(err);
-        });
-
-        socket.on('disconnect', (evt: any) => {
-            console.log('socket.io disconnect:', evt);
-        });
-
-        socket.on('socketConnection-finish', (message: { type: string, id: any }) => {
-            console.log('socketConnection-finish', message);
-            if (message.type === 'finish') {
-                if (socket.id !== message.id) {
-                    console.warn('WARN: socket-client != socket-server', socket.io, message.id);
-                }
-
-                console.log('connected to server. clientId=' + message.id);
-                socketId = message.id;
-                resolve(null);
-            }
-            else {
-                console.error('UNKNOWN message from server:', message);
-            }
-        });
-
-    })
-}
-
-async function subscribe() {
-    console.log('subscribe')
-    const params = await sendRequest('createConsumerTransport',{});
-    
-    consumerTransport = device.createRecvTransport(params);
-    console.log('subscribe1')
-    consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback)=>{
-        sendRequest('connectConsumerTransport', {dtlsParameters: dtlsParameters})
-            .then(callback)
-            .catch(errback);
-    });
-
-    consumerTransport.on('connectionstatechange', (state) => {
-        switch (state) {
-            case 'connecting':
-                console.log('subscribing...');
-                break;
-
-            case 'connected':
-                console.log('subscribed');
-                break;
-
-            case 'failed':
-                console.log('failed');
-                consumerTransport.close();
-                break;
-
-            default:
-                break;
-        }
-    });
-    
-
-    consumeOtherProducers(socketId);
-
-}
-
-async function consumeOtherProducers(socketId: any) {
-    const otherProducers = await sendRequest('getOtherProducers', {localId: socketId})
-        .catch((error: any) => {
-            console.log('getOtherProducers error', error);
+        await connectSocket().catch(error => {
+            console.log(error);
             return;
         });
-    const videoIds = otherProducers.VideoIds;
-    const audioIds = otherProducers.AudioIds;
-    console.log('otherProducers', otherProducers);
-    
-    videoIds.forEach((vid: any) => {
-        consumeAdd(consumerTransport, vid, null, 'video');
-    });
 
-    audioIds.forEach((aid: any) => {
-        consumeAdd(consumerTransport, aid, null, 'audio');
-    });
-};
 
-async function consumeAdd(consumerTransport: mediaSoupTypes.Transport, producerSocketId: any, prdId: any, tkind: string) {
-    const { rtpCapabilities } = device;
-    const data = await sendRequest('consumeAdd', { rtpCapabilities: rtpCapabilities, producereId: producerSocketId, kind: tkind })
-        .catch((err: any) => {
-            console.log('consumeAdd error', err);
+        const data: mediaSoupTypes.RtpCapabilities = await sendRequest('getRouterRtpCapabilities', {});
+        console.log('getRouterRtpCapabilities:', data);
+        await loadDevice(data);
+
+
+
+
+
+        async function loadDevice(routerRtpCapabilities: mediaSoupTypes.RtpCapabilities) {
+            try {
+                device = new Device();
+            } catch (error: any) {
+                if (error.name === 'UnsupportedError') {
+                    console.error('browser not supported');
+                }
+            }
+            await device.load({ routerRtpCapabilities });
+        }
+
+    }
+
+    function connectSocket() {
+        if (socket) {
+            socket.close();
+            socket = null;
+        }
+
+        return new Promise((resolve, reject) => {
+            const serverUrl = `http://${hostname}:${hostport}`;
+            const opts = {
+                path: '/server',
+                transports: ['websocket'],
+            };
+
+            socket = io(serverUrl, opts);
+
+            socket.on('connect', () => {
+                console.log('socket-client connected!');
+            })
+
+            socket.on('error', (err: any) => {
+                console.error('socket.io ERROR:', err);
+                reject(err);
+            });
+
+            socket.on('disconnect', (evt: any) => {
+                console.log('socket.io disconnect:', evt);
+            });
+
+            socket.on('socketConnection-finish', (message: { type: string, id: any }) => {
+                console.log('socketConnection-finish', message);
+                if (message.type === 'finish') {
+                    if (socket.id !== message.id) {
+                        console.warn('WARN: socket-client != socket-server', socket.io, message.id);
+                    }
+
+                    console.log('connected to server. clientId=' + message.id);
+                    socketId = message.id;
+                    resolve(null);
+                }
+                else {
+                    console.error('UNKNOWN message from server:', message);
+                }
+            });
+
+        })
+    }
+
+    async function subscribe() {
+        console.log('subscribe start')
+        
+
+        if (!consumerTransport) {
+            const params = await sendRequest('createConsumerTransport', {});
+            consumerTransport = device.createRecvTransport(params);
+
+            consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+                console.log('--consumer trasnport connect');
+                sendRequest('connectConsumerTransport', { dtlsParameters: dtlsParameters })
+                    .then(callback)
+                    .catch(errback);
+            });
+
+            consumerTransport.on('connectionstatechange', (state) => {
+                switch (state) {
+                    case 'connecting':
+                        console.log('subscribing...');
+                        break;
+
+                    case 'connected':
+                        console.log('subscribed');
+                        break;
+
+                    case 'failed':
+                        console.log('failed');
+                        consumerTransport.close();
+                        break;
+
+                    default:
+                        console.log('시발새키야');
+                        break;
+                }
+            });
+
+
+            consumeOtherProducers(socketId);
+        }
+        
+    }
+
+    async function consumeOtherProducers(socketId: any) {
+        const otherProducers = await sendRequest('getOtherProducers', { localId: socketId })
+            .catch((error: any) => {
+                console.log('getOtherProducers error', error);
+                return;
+            });
+        const videoIds = otherProducers.VideoIds;
+        const audioIds = otherProducers.AudioIds;
+        console.log('otherProducers', otherProducers);
+
+        videoIds.forEach((vid: any) => {
+            consumeAdd(consumerTransport, vid, null, 'video');
         });
 
-    if (prdId && (prdId !== producerSocketId)) {
-        console.warn('producerID NOT MATCH');
-    }
+        audioIds.forEach((aid: any) => {
+            consumeAdd(consumerTransport, aid, null, 'audio');
+        });
+    };
 
-    const id = data.id;
-    const producerId = data.producerId;
-    const rtpParameters = data.rtpParameters;
-    const kind = data.kind;
-
-    let codecOptions: any = {};
-    const consumer = await consumerTransport.consume({
-      id,
-      producerId,
-      kind,
-      rtpParameters,
-    });
-    // TODO VIDEO
-    addSubVideo(producerSocketId, consumer.track);
-    addConsumer(producerSocketId, consumer, kind);
-
-
-    if (kind === 'video') {
-        console.log('--try resumeAdd --');
-        sendRequest('resumeAdd', { producerId: producerSocketId, kind: kind })
-            .then(() => {
-                console.log('resumeAdd OK');
-            })
+    async function consumeAdd(consumerTransport: mediaSoupTypes.Transport, producerSocketId: any, prdId: any, tkind: string) {
+        const { rtpCapabilities } = device;
+        const data = await sendRequest('consumeAdd', { rtpCapabilities: rtpCapabilities, producereId: producerSocketId, kind: tkind })
             .catch((err: any) => {
-                console.error('resumeAdd ERROR:', err);
+                console.log('consumeAdd error', err);
             });
+
+        if (prdId && (prdId !== producerSocketId)) {
+            console.warn('producerID NOT MATCH');
+        }
+
+        const id = data.id;
+        const producerId = data.producerId;
+        const rtpParameters = data.rtpParameters;
+        const kind = data.kind;
+
+        let codecOptions: any = {};
+        const consumer = await consumerTransport.consume({
+            id,
+            producerId,
+            kind,
+            rtpParameters,
+        });
+        // TODO VIDEO
+        addSubVideo(producerSocketId, consumer.track, kind);
+        addConsumer(producerSocketId, consumer, kind);
+
+
+        if (kind === 'video') {
+            console.log('--try resumeAdd --');
+            sendRequest('resumeAdd', { producerId: producerSocketId, kind: kind })
+                .then(() => {
+                    console.log('resumeAdd OK');
+                })
+                .catch((err: any) => {
+                    console.error('resumeAdd ERROR:', err);
+                });
+        }
+
+
     }
 
-    
-}
 
 
 
-
-function sendRequest(type : string, data : any): any {
-    console.log('sendRequest', type);
-    return new Promise((resolve, reject) => {
-        socket.emit(type, data, (respond : any, err : any) => {
-            if(err){
-                reject(err);
-            }
-            else{
-                resolve(respond);
-            }
+    function sendRequest(type: string, data: any): any {
+        console.log('[sendRequest]', type);
+        return new Promise((resolve, reject) => {
+            socket.emit(type, data, (respond: any, err: any) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(respond);
+                }
+            })
         })
-    })
-}
-
-function addConsumer(id: any, consumer: any, kind: any) {
-    if (kind === 'video') {
-        videoConsumers[id] = consumer;
-        console.log('videoConsumers count=' + Object.keys(videoConsumers).length);
     }
-    else if (kind === 'audio') {
-        audioConsumers[id] = consumer;
-        console.log('audioConsumers count=' + Object.keys(audioConsumers).length);
+
+    function addConsumer(id: any, consumer: any, kind: any) {
+        if (kind === 'video') {
+            videoConsumers[id] = consumer;
+            console.log('videoConsumers count=' + Object.keys(videoConsumers).length);
+        }
+        else if (kind === 'audio') {
+            audioConsumers[id] = consumer;
+            console.log('audioConsumers count=' + Object.keys(audioConsumers).length);
+        }
+        else {
+            console.warn('UNKNOWN consumer kind=' + kind);
+        }
     }
-    else {
-        console.warn('UNKNOWN consumer kind=' + kind);
+
+    async function addSubVideo(producerSocketId: any, track: any, kind: any) {
+        let stream = mediaStreams[producerSocketId];
+        if(!stream){
+            mediaStreams[producerSocketId] = new MediaStream();
+            mediaStreams[producerSocketId].addTrack(track);
+            
+        }
+        else{
+            await mediaStreams[producerSocketId].addTrack(track);
+            await setSubVideos(oldItems => [...oldItems, {id: producerSocketId, stream: mediaStreams[producerSocketId]}]);
+            delete mediaStreams[producerSocketId];
+            
+        }
+
     }
+
+
 }
-
-function addSubVideo(producerSocketId: any, track: any){
-    
-
-    const newStream = new MediaStream();
-    newStream.addTrack(track);
-    const localVideoRef = useRef<HTMLVideoElement>(null);
-
-    
-}
+export default Room;

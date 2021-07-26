@@ -18,7 +18,7 @@ export async function VideoOn(publishData: publishDataType) {
     producerTransport = publishData.producerTransport;
     device = publishData.device;
 
-    navigator.mediaDevices.getUserMedia({video:true, audio:true})
+    await navigator.mediaDevices.getUserMedia({video:true, audio:true})
     .then((stream : any)=>{
         localStream = stream;
         playVideo(localVideoRef, localStream);
@@ -38,6 +38,7 @@ export async function VideoOn(publishData: publishDataType) {
     });
 
     producerTransport.on('produce', async ({ kind, rtpParameters }, callback, errback) => {
+        console.log('--trasnport produce');
         try {
             const { id } = await sendRequest('produce', {
                 transportId: producerTransport.id,
@@ -98,7 +99,7 @@ function playVideo(element : any, stream : any) {
 }
 
 function sendRequest(type : string, data : any): any {
-    console.log('sendRequest', type);
+    console.log('[sendRequest]', type);
     return new Promise((resolve, reject) => {
         socket.emit(type, data, (respond : any, err : any) => {
             if(err){
