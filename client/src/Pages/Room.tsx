@@ -365,9 +365,6 @@ const Room = () => {
         
         setSubVideos((subVideos) => (subVideos.filter(item => item.id !== id)));
        
-       
-       
-        
     }
 
 
