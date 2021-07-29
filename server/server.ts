@@ -29,7 +29,9 @@ io.on('connection', (socket : any)=>{
  
     
     socket.on('disconnect', ()=>{
-        // TODO
+        const roomname = getRoomname();
+        cleanUpPeer(roomname, socket);
+        socket.leave(roomname);
        
     })
 
@@ -177,7 +179,7 @@ io.on('connection', (socket : any)=>{
         }
 
         const { consumer, params }: any = await createConsumer(roomname, transport, producer, rtpCapabilities);
-        addConsumer(localId, producereId, consumer, kind);
+        addConsumer(roomname, localId, producereId, consumer, kind);
         consumer.observer.on('close', () => {
             console.log('consumer closed ---');
         })
@@ -186,7 +188,7 @@ io.on('connection', (socket : any)=>{
             consumer.close();
             removeConsumer(localId, producereId, kind);
 
-            // -- notify to client  TODO---
+            // -- notify to client ---
             socket.emit('producerClosed', { localId: localId, producereId: producereId, kind: kind });
         });
 
@@ -195,14 +197,16 @@ io.on('connection', (socket : any)=>{
     });
 
     socket.on('resumeAdd', async (data: any, callback: any) => {
+        const roomname = getRoomname();
         const localId = socket.id;
         const producerId = data.producerId;
         const kind = data.kind;
         console.log('-- resumeAdd localId=%s remoteId=%s kind=%s', localId, producerId, kind);
-        let consumer = getConsumer(localId, producerId, kind);
+        let consumer = getConsumer(roomname, localId, producerId, kind);
         if (!consumer) {
             console.error('consumer NOT EXIST for remoteId=' + producerId);
             callback(null, 'consumer NOT EXIST for remoteId=' + producerId);
+            return;
         }
         await consumer.resume();
         callback({}, null);
@@ -300,13 +304,6 @@ startWorker();
 
 
 
-
-// --- multi-producers --
-let producerTransports: any = {};
-let videoProducers: any = {};
-let audioProducers: any = {};
-
-
 function getProducerTrasnport(roomname: string, id: any) {
     const room = Room.getRoom(roomname);
     return room.getProducerTrasnport(id);
@@ -356,13 +353,13 @@ let videoConsumers: any = {};
 let audioConsumers: any = {};
 
 function getConsumerTransport(roomname: string, id: any): mediaSoupTypes.WebRtcTransport{
-    return consumerTransports[id];
+    const room = Room.getRoom(roomname);
+    return room.getConsumerTrasnport(id);
 }
 
 function addConsumerTransport(roomname: string, id: any, transport: mediaSoupTypes.WebRtcTransport){
     const room = Room.getRoom(roomname);
-
-    consumerTransports[id] = transport;
+    room.addConsumerTrasport(id, transport);
 }
 
 function removeConsumerTransport(roomname: any, id: any){
@@ -395,15 +392,9 @@ function addConsumerSet(localId: any, set: any, kind: string) {
 }
 
 
-function getConsumer(localId: any, remoteId: any, kind: string) {
-    
-    const set = getConsumerSet(localId, kind);
-    if (set) {
-        return set[remoteId];
-    }
-    else {
-        return null;
-    }
+function getConsumer(roomname: any, localId: any, remoteId: any, kind: string) {
+    const room = Room.getRoom(roomname);
+    return room.getConsumer(localId, remoteId, kind);
 }
 
 
@@ -444,15 +435,7 @@ async function createConsumer(roomname: any, transport: mediaSoupTypes.WebRtcTra
 
 function addConsumer(roomname: any, localId: any, producerId: any, consumer: mediaSoupTypes.Consumer, kind: string){
     const room = Room.getRoom(roomname);
-    const set = getConsumerSet(localId, kind);
-    if(set){
-        set[producerId] = consumer;
-    }
-    else{
-        const newSet: any = {};
-        newSet[producerId] = consumer;
-        addConsumerSet(localId, newSet, kind);
-    }
+    room.addConsumer(localId, producerId, consumer, kind);
 }
 
 function removeConsumer(localId: any, producereId: any, kind: string) {
@@ -467,9 +450,9 @@ function removeConsumer(localId: any, producereId: any, kind: string) {
 }
 
 
-function cleanUpPeer(socket: any) {
+function cleanUpPeer(roomname: any, socket: any) {
     const id = socket.id;
-    removeConsumerSetDeep(id);
+    removeConsumerSetDeep(roomname, id);
     /*
     const consumer = getConsumer(id);
     if (consumer) {
@@ -701,6 +684,16 @@ class Room {
         }
         else {
             console.log('NO set for room=%s kind=%s, localId=%s', this.name, kind, localId);
+        }
+    }
+
+    getConsumer(localId: any, remoteId: any, kind: string) {
+        const set = this.getConsumerSet(localId, kind);
+        if (set) {
+            return set[remoteId];
+        }
+        else {
+            return null;
         }
     }
 
