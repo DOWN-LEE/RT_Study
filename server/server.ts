@@ -8,6 +8,7 @@ const http = require("http");
 const https = require("https");
 const express = require('express');
 
+
 const app = express();
 
 let webServer : any = null;
@@ -35,8 +36,8 @@ io.on('connection', (socket : any)=>{
        
     })
 
-    socket.on('prepare_room', async (data: any) => {
-        const roomId = data.roomdId;
+    socket.on('prepare_room', async (data: any, callback: any) => {
+        const roomId = data.roomId;
         const existRoom = Room.getRoom(roomId);
         if (existRoom) {
             console.log('--- use exist room. roomId=' + roomId);
@@ -48,6 +49,8 @@ io.on('connection', (socket : any)=>{
         // --- socket.io room ---
         socket.join(roomId);
         setRoomname(roomId);
+
+        callback({}, null);
     })
 
     socket.on('getRouterRtpCapabilities', (data : any, callback : any) => {
@@ -55,10 +58,11 @@ io.on('connection', (socket : any)=>{
         const room = Room.getRoom(roomname);
         if(!room){
             callback(null, {text: '[getRouterRtpCapabilities]: there is no room'})
+            return;
         }
 
         if(room.router){
-            callback(router.rtpCapabilities, null);
+            callback(room.router.rtpCapabilities, null);
         }
         else{
             callback(null, {text: '[getRouterRtpCapabilities]: there is no router'});
@@ -186,7 +190,7 @@ io.on('connection', (socket : any)=>{
         consumer.on('producerclose', () => {
             console.log('consumer -- on.producerclose');
             consumer.close();
-            removeConsumer(localId, producereId, kind);
+            removeConsumer(roomname, localId, producereId, kind);
 
             // -- notify to client ---
             socket.emit('producerClosed', { localId: localId, producereId: producereId, kind: kind });
@@ -228,47 +232,7 @@ io.on('connection', (socket : any)=>{
 })
 
 
-import {createWorker, types as mediaSoupTypes} from 'mediasoup';
 
-let router: mediaSoupTypes.Router;
-let worker: mediaSoupTypes.Worker;
-const mediaCodecs: any =
-[
-  {
-    kind        : "audio",
-    mimeType    : "audio/opus",
-    clockRate   : 48000,
-    channels    : 2
-  },
-  {
-    kind       : "video",
-    mimeType   : "video/H264",
-    clockRate  : 90000,
-    parameters :
-    {
-      "packetization-mode"      : 1,
-      "profile-level-id"        : "42e01f",
-      "level-asymmetry-allowed" : 1
-    }
-  }
-];
-
-const WebRtcTransportOptions: mediaSoupTypes.WebRtcTransportOptions =
-{
-    listenIps: [
-      { ip: '127.0.0.1', announcedIp: '127.0.0.1' }
-    ],
-    enableUdp: true,
-    enableTcp: true,
-    preferUdp: true,
-    initialAvailableOutgoingBitrate: 1000000,
-};
-
-async function startWorker() {
-    worker = await createWorker();
-    router = await worker.createRouter({mediaCodecs});
-    console.log('-- mediasoup worker start. --')
-}
 
 
 async function createTransport(roomname: string){
@@ -297,11 +261,11 @@ async function createTransport(roomname: string){
     }
 }
 
-startWorker();
 
 
 
 
+// --- multi-consumers --
 
 
 function getProducerTrasnport(roomname: string, id: any) {
@@ -348,9 +312,6 @@ function addProducer(roomname: string, id: any, producer: any, kind: any) {
 
 
 // --- multi-consumers --
-let consumerTransports: any = {};
-let videoConsumers: any = {};
-let audioConsumers: any = {};
 
 function getConsumerTransport(roomname: string, id: any): mediaSoupTypes.WebRtcTransport{
     const room = Room.getRoom(roomname);
@@ -365,30 +326,6 @@ function addConsumerTransport(roomname: string, id: any, transport: mediaSoupTyp
 function removeConsumerTransport(roomname: any, id: any){
     const room = Room.getRoom(roomname);
     room.removeConsumerTransport(id);
-}
-
-function getConsumerSet(localId: any, kind: string) {
-    if (kind === 'video') {
-      return videoConsumers[localId];
-    }
-    else if (kind === 'audio') {
-      return audioConsumers[localId];
-    }
-    else {
-      console.warn('WARN: getConsumerSet() UNKNWON kind=%s', kind);
-    }
-}
-
-function addConsumerSet(localId: any, set: any, kind: string) {
-    if (kind === 'video') {
-      videoConsumers[localId] = set;
-    }
-    else if (kind === 'audio') {
-      audioConsumers[localId] = set;
-    }
-    else {
-      console.warn('WARN: addConsumerSet() UNKNWON kind=%s', kind);
-    }
 }
 
 
@@ -438,50 +375,37 @@ function addConsumer(roomname: any, localId: any, producerId: any, consumer: med
     room.addConsumer(localId, producerId, consumer, kind);
 }
 
-function removeConsumer(localId: any, producereId: any, kind: string) {
-    const set = getConsumerSet(localId, kind);
-    if (set) {
-        delete set[producereId];
-        console.log('consumers kind=%s count=%d', kind, Object.keys(set).length);
-    }
-    else {
-        console.log('NO set for kind=%s, localId=%s', kind, localId);
-    }
+function removeConsumer(roomname: any, localId: any, producereId: any, kind: string) {
+    const room = Room.getRoom(roomname);
+    room.removeConsumer(localId, producereId, kind);
 }
 
 
 function cleanUpPeer(roomname: any, socket: any) {
     const id = socket.id;
     removeConsumerSetDeep(roomname, id);
-    /*
-    const consumer = getConsumer(id);
-    if (consumer) {
-      consumer.close();
-      removeConsumer(id);
-    }
-    */
   
-    const transport = getConsumerTransport(id);
+    const transport = getConsumerTransport(roomname, id);
     if (transport) {
       transport.close();
-      removeConsumerTransport(id);
+      removeConsumerTransport(roomname, id);
     }
   
-    const videoProducer = getProducer(id, 'video');
+    const videoProducer = getProducer(roomname, id, 'video');
     if (videoProducer) {
       videoProducer.close();
-      removeProducer(id, 'video');
+      removeProducer(roomname, id, 'video');
     }
-    const audioProducer = getProducer(id, 'audio');
+    const audioProducer = getProducer(roomname, id, 'audio');
     if (audioProducer) {
       audioProducer.close();
-      removeProducer(id, 'audio');
+      removeProducer(roomname, id, 'audio');
     }
   
-    const producerTransport = getProducerTrasnport(id);
+    const producerTransport = getProducerTrasnport(roomname, id);
     if (producerTransport) {
       producerTransport.close();
-      removeProducerTransport(id);
+      removeProducerTransport(roomname, id);
     }
   }
 
@@ -729,3 +653,49 @@ async function setupRoom(name: any) {
     Room.addRoom(room, name);
     return room;
 }
+
+
+
+
+import {createWorker, types as mediaSoupTypes} from 'mediasoup';
+
+let worker: mediaSoupTypes.Worker;
+const mediaCodecs: any =
+[
+  {
+    kind        : "audio",
+    mimeType    : "audio/opus",
+    clockRate   : 48000,
+    channels    : 2
+  },
+  {
+    kind       : "video",
+    mimeType   : "video/H264",
+    clockRate  : 90000,
+    parameters :
+    {
+      "packetization-mode"      : 1,
+      "profile-level-id"        : "42e01f",
+      "level-asymmetry-allowed" : 1
+    }
+  }
+];
+
+const WebRtcTransportOptions: mediaSoupTypes.WebRtcTransportOptions =
+{
+    listenIps: [
+      { ip: '127.0.0.1', announcedIp: '127.0.0.1' }
+    ],
+    enableUdp: true,
+    enableTcp: true,
+    preferUdp: true,
+    initialAvailableOutgoingBitrate: 1000000,
+};
+
+async function startWorker() {
+    worker = await createWorker();
+    console.log('-- mediasoup worker start. --')
+}
+
+startWorker();
+

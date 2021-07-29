@@ -141,7 +141,10 @@ const Room = () => {
         });
 
 
-        const data: mediaSoupTypes.RtpCapabilities = await sendRequest('getRouterRtpCapabilities', {});
+        const data: mediaSoupTypes.RtpCapabilities = await sendRequest('getRouterRtpCapabilities', {})
+            .catch((err: any)=>{
+                console.log("[error]: ",err);
+            });
         console.log('getRouterRtpCapabilities:', data);
         await loadDevice(data);
 
@@ -178,10 +181,10 @@ const Room = () => {
 
             socket = io(serverUrl, opts);
 
-            socket.on('connect', async () => {
+            socket.on('connect', () => {
                 const roomName = getRoomName();
-                await sendRequest('prepare_room', {roomId: roomName});
                 console.log('socket-client connected! room: ', roomName);
+
             })
 
             socket.on('error', (err: any) => {
@@ -193,7 +196,13 @@ const Room = () => {
                 console.log('socket.io disconnect:', evt);
             });
 
-            socket.on('socketConnection-finish', (message: { type: string, id: any }) => {      
+            socket.on('socketConnection-finish', async (message: { type: string, id: any }) => {      
+
+                await sendRequest('prepare_room', {roomId: roomName})
+                    .then(()=>{
+                        console.log('prepare room : ', roomName);
+                    });
+                
                 console.log('socketConnection-finish', message);
                 if (message.type === 'finish') {
                     if (socket.id !== message.id) {
