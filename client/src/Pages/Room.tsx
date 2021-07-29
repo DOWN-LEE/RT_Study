@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import { VideoOn } from './Publish';
 import Video from './Video';
 import { publishDataType } from './@type/index';
-import { userInfo } from 'node:os';
+
 
 const Container = Styled.div`
     position: relative;
@@ -38,14 +38,13 @@ let audioConsumers: any = {};
 let mediaStreams: any = {};
 
 
-const Room = () => {
+const Room = (props: any) => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
 
     const [status, setStatus] = useState('Hi');
     const [connectReady, setConnectReady] = useState(false);
     const [subVideos, setSubVideos] = useState<Array<any>>([]);
-
 
 
     const videoOnClick = () => {
@@ -61,7 +60,7 @@ const Room = () => {
         VideoOn(publishData);
     }
 
-
+   
 
     // join
     useEffect(() => {
@@ -141,7 +140,10 @@ const Room = () => {
         });
 
 
-        const data: mediaSoupTypes.RtpCapabilities = await sendRequest('getRouterRtpCapabilities', {});
+        const data: mediaSoupTypes.RtpCapabilities = await sendRequest('getRouterRtpCapabilities', {})
+            .catch((err: any)=>{
+                console.log("[error]: ",err);
+            });
         console.log('getRouterRtpCapabilities:', data);
         await loadDevice(data);
 
@@ -166,6 +168,7 @@ const Room = () => {
         if (socket) {
             socket.close();
             socket = null;
+            socketId = null;
         }
 
         return new Promise((resolve, reject) => {
@@ -178,7 +181,9 @@ const Room = () => {
             socket = io(serverUrl, opts);
 
             socket.on('connect', () => {
-                console.log('socket-client connected!');
+                const roomName = getRoomName();
+                console.log('socket-client connected! room: ', roomName);
+
             })
 
             socket.on('error', (err: any) => {
@@ -190,7 +195,13 @@ const Room = () => {
                 console.log('socket.io disconnect:', evt);
             });
 
-            socket.on('socketConnection-finish', (message: { type: string, id: any }) => {
+            socket.on('socketConnection-finish', async (message: { type: string, id: any }) => {      
+                const roomName = getRoomName();
+                await sendRequest('prepare_room', {roomId: roomName})
+                    .then(()=>{
+                        console.log('prepare room : ', roomName);
+                    });
+                
                 console.log('socketConnection-finish', message);
                 if (message.type === 'finish') {
                     if (socket.id !== message.id) {
@@ -234,6 +245,7 @@ const Room = () => {
 
         })
     }
+    //TODO DISCONNECT
 
     async function subscribe() {
         console.log('subscribe start')
@@ -411,6 +423,14 @@ const Room = () => {
             
         }
 
+    }
+
+
+
+    function getRoomName() {
+        
+       
+        return props.match.params.roomname;
     }
 
 
