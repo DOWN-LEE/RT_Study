@@ -46,7 +46,7 @@ const Room = () => {
     const [connectReady, setConnectReady] = useState(false);
     const [subVideos, setSubVideos] = useState<Array<any>>([]);
 
-
+    const roomName = 'daun123';
 
     const videoOnClick = () => {
 
@@ -166,6 +166,7 @@ const Room = () => {
         if (socket) {
             socket.close();
             socket = null;
+            socketId = null;
         }
 
         return new Promise((resolve, reject) => {
@@ -177,8 +178,10 @@ const Room = () => {
 
             socket = io(serverUrl, opts);
 
-            socket.on('connect', () => {
-                console.log('socket-client connected!');
+            socket.on('connect', async () => {
+                const roomName = getRoomName();
+                await sendRequest('prepare_room', {roomId: roomName});
+                console.log('socket-client connected! room: ', roomName);
             })
 
             socket.on('error', (err: any) => {
@@ -190,7 +193,7 @@ const Room = () => {
                 console.log('socket.io disconnect:', evt);
             });
 
-            socket.on('socketConnection-finish', (message: { type: string, id: any }) => {
+            socket.on('socketConnection-finish', (message: { type: string, id: any }) => {      
                 console.log('socketConnection-finish', message);
                 if (message.type === 'finish') {
                     if (socket.id !== message.id) {
@@ -234,6 +237,7 @@ const Room = () => {
 
         })
     }
+    //TODO DISCONNECT
 
     async function subscribe() {
         console.log('subscribe start')
@@ -411,6 +415,14 @@ const Room = () => {
             
         }
 
+    }
+
+
+
+    function getRoomName() {
+        
+       
+        return 'daun';
     }
 
 
