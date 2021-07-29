@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import { VideoOn } from './Publish';
 import Video from './Video';
 import { publishDataType } from './@type/index';
-import { userInfo } from 'node:os';
+
 
 const Container = Styled.div`
     position: relative;
@@ -38,7 +38,7 @@ let audioConsumers: any = {};
 let mediaStreams: any = {};
 
 
-const Room = () => {
+const Room = (props: any) => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -46,7 +46,6 @@ const Room = () => {
     const [connectReady, setConnectReady] = useState(false);
     const [subVideos, setSubVideos] = useState<Array<any>>([]);
 
-    const roomName = 'daun123';
 
     const videoOnClick = () => {
 
@@ -61,7 +60,7 @@ const Room = () => {
         VideoOn(publishData);
     }
 
-
+   
 
     // join
     useEffect(() => {
@@ -197,7 +196,7 @@ const Room = () => {
             });
 
             socket.on('socketConnection-finish', async (message: { type: string, id: any }) => {      
-
+                const roomName = getRoomName();
                 await sendRequest('prepare_room', {roomId: roomName})
                     .then(()=>{
                         console.log('prepare room : ', roomName);
@@ -431,7 +430,7 @@ const Room = () => {
     function getRoomName() {
         
        
-        return 'daun';
+        return props.match.params.roomname;
     }
 
 
