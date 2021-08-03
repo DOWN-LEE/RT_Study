@@ -15,7 +15,7 @@
 
 ## 구현
 ### Architecture
-
+![Frame 8](https://user-images.githubusercontent.com/59424336/127957448-9e15ef91-2ee7-44e4-bee7-c743198c033e.png)
 
 ### Backend
 #### 기술스택
