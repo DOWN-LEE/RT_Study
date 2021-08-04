@@ -22,6 +22,7 @@ export async function VideoOn(publishData: publishDataType) {
     .then((stream : any)=>{
         localStream = stream;
         playVideo(localVideoRef, localStream);
+        
     })
     .catch(error => {
         console.log('getUserMedia error!', error);

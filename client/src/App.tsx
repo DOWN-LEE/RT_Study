@@ -1,6 +1,6 @@
 import React from 'react';
 import {Route, Switch} from 'react-router-dom';
-import Room from './Pages/Room';
+import Room from './Pages/Room/Room';
 import './App.css';
 
 function App() {

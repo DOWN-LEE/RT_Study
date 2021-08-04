@@ -11,6 +11,8 @@ import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
 import * as blazeface from '@tensorflow-models/blazeface';
 
+import './Room.css';
+
 const Container = Styled.div`
     position: relative;
     display: inline-block;
@@ -71,7 +73,7 @@ const Room = (props: any) => {
 
     // join
     useEffect(() => {
-        console.log("@@@@@@@@@@@@@@@@@@@@@@@@~!!");
+
         con();
 
         async function con() {
@@ -102,6 +104,8 @@ const Room = (props: any) => {
         console.log("face!")
         let ctx: any;
         if(canvasRef.current && localVideoRef.current){
+            canvasRef.current.width = localVideoRef.current.videoWidth;
+            canvasRef.current.height = localVideoRef.current.videoHeight;
             ctx = canvasRef.current.getContext('2d');
         }
         else{
@@ -109,12 +113,14 @@ const Room = (props: any) => {
         }
 
         const preds = await facemodel.estimateFaces(localVideoRef.current, false);
-
+        console.log(preds);
         for (let i = 0; i < preds.length; i++) {
             let p: any = preds[i];
-            ctx.strokeStyle = "#FF0000";
-            ctx.lineWidth = 5;
-            ctx.strokeRect(p.topLeft[0], p.topLeft[1], p.bottomRight[0] - p.topLeft[0], p.bottomRight[1] - p.topLeft[1]);
+            
+            ctx.fillStyle = "#00FFFF";
+            console.log("칠한다!, ", p.bottomRight[0] - p.topLeft[0],p.bottomRight[1] - p.topLeft[1])
+            ctx.fillRect(p.topLeft[0], p.topLeft[1], p.bottomRight[0] - p.topLeft[0], p.bottomRight[1] - p.topLeft[1]);
+
         }
 
 
@@ -134,17 +140,26 @@ const Room = (props: any) => {
             <button onClick={videoOnClick} disabled={!connectReady}>ho</button>
             <button onClick={videoOnClick2} disabled={!connectReady}>seo</button>
             <video
+                className = 'myVideo'
                 controls
+                muted
                 style={{
-                    width: 240,
-                    height: 240,
+                    width:'30vw',
+                    height:'30vw',
+                    
                     margin: 5,
                     backgroundColor: 'pink'
                 }}
                 ref={localVideoRef}
-            >
-            </video>
-            <canvas ref={canvasRef} style={{width:240, height:240}}/>
+            />
+            <canvas 
+                className = 'myVideo2'
+                ref={canvasRef}
+                style={{width:'30vw', height:'30vw', border: '1px solid green'}}
+            />
+            
+            
+           
 
             {subVideos.map((videoinfo, index) => {
                 return (
