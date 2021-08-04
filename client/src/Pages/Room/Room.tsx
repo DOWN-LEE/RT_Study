@@ -7,6 +7,9 @@ import { VideoOn } from './Publish';
 import Video from './Video';
 import { publishDataType } from './@type/index';
 
+import * as tf from '@tensorflow/tfjs-core';
+import '@tensorflow/tfjs-backend-webgl';
+import * as blazeface from '@tensorflow-models/blazeface';
 
 const Container = Styled.div`
     position: relative;
@@ -37,10 +40,14 @@ let audioConsumers: any = {};
 
 let mediaStreams: any = {};
 
+let facemodel: blazeface.BlazeFaceModel;
+
+
 
 const Room = (props: any) => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const [status, setStatus] = useState('Hi');
     const [connectReady, setConnectReady] = useState(false);
@@ -64,7 +71,7 @@ const Room = (props: any) => {
 
     // join
     useEffect(() => {
-
+        console.log("@@@@@@@@@@@@@@@@@@@@@@@@~!!");
         con();
 
         async function con() {
@@ -81,11 +88,37 @@ const Room = (props: any) => {
     }, [connectReady])
 
 
+    useEffect(() => {
+        const initTM = async () => {
+            await tf.setBackend('webgl');
+            facemodel = await blazeface.load();
+        }
+        initTM();
+    }, []);
 
 
-    const videoOnClick2 = () => {
 
-        console.log(subVideos);
+    const videoOnClick2 = async () => {
+        console.log("face!")
+        let ctx: any;
+        if(canvasRef.current && localVideoRef.current){
+            ctx = canvasRef.current.getContext('2d');
+        }
+        else{
+            return;
+        }
+
+        const preds = await facemodel.estimateFaces(localVideoRef.current, false);
+
+        for (let i = 0; i < preds.length; i++) {
+            let p: any = preds[i];
+            ctx.strokeStyle = "#FF0000";
+            ctx.lineWidth = 5;
+            ctx.strokeRect(p.topLeft[0], p.topLeft[1], p.bottomRight[0] - p.topLeft[0], p.bottomRight[1] - p.topLeft[1]);
+        }
+
+
+        
     }
 
 
@@ -111,6 +144,7 @@ const Room = (props: any) => {
                 ref={localVideoRef}
             >
             </video>
+            <canvas ref={canvasRef} style={{width:240, height:240}}/>
 
             {subVideos.map((videoinfo, index) => {
                 return (
