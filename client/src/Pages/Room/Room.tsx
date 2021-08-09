@@ -50,10 +50,21 @@ const Room = (props: any) => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const studyTimer = useRef(null);
 
     const [status, setStatus] = useState('Hi');
     const [connectReady, setConnectReady] = useState(false);
     const [subVideos, setSubVideos] = useState<Array<any>>([]);
+    const [studyTime, setStudyTime] = useState<number>(0);
+
+    const formatTime = () => {
+        const getSeconds: any = `0${(studyTime % 60)}`.slice(-2)
+        const minutes: any = `${Math.floor(studyTime / 60)}`
+        const getMinutes = `0${minutes % 60}`.slice(-2)
+        const getHours = `0${Math.floor(studyTime / 3600)}`.slice(-2)
+    
+        return `${getHours} : ${getMinutes} : ${getSeconds}`
+    }
 
 
     const videoOnClick = () => {
@@ -97,6 +108,10 @@ const Room = (props: any) => {
         }
         initTM();
     }, []);
+
+    
+
+
 
 
 
@@ -152,14 +167,14 @@ const Room = (props: any) => {
                 }}
                 ref={localVideoRef}
             />
-            <canvas 
+            {/* <canvas 
                 className = 'myVideo2'
                 ref={canvasRef}
                 style={{width:'30vw', height:'30vw', border: '1px solid green'}}
-            />
+            /> */}
             
             
-           
+           <h2> Time!!! {formatTime()}</h2>
 
             {subVideos.map((videoinfo, index) => {
                 return (
