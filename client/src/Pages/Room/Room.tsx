@@ -50,12 +50,18 @@ const Room = (props: any) => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const studyTimer = useRef(null);
+    const studyTimer: any = useRef(null);
+    const faceCheck: any = useRef(null);
 
     const [status, setStatus] = useState('Hi');
     const [connectReady, setConnectReady] = useState(false);
     const [subVideos, setSubVideos] = useState<Array<any>>([]);
+
     const [studyTime, setStudyTime] = useState<number>(0);
+    const [latestTime, setLatestTime] = useState<number>(0);
+    const [isFace, setIsFace] = useState(false);
+    const [timerOn, setTimerOn] = useState(false);
+    
 
     const formatTime = () => {
         const getSeconds: any = `0${(studyTime % 60)}`.slice(-2)
@@ -68,16 +74,58 @@ const Room = (props: any) => {
 
 
     const videoOnClick = () => {
+        
+        const videoOnClick_ = async() => {
+            const publishData: publishDataType = {
+                localStream: localStream,
+                localVideoRef: localVideoRef,
+                socket: socket,
+                producerTransport: producerTransport,
+                device: device
+            }
+    
+            await VideoOn(publishData);
+            
+            faceCheck.current = setInterval(async () => {
+               
+                
+                if (!localVideoRef.current) {
+                    return;
+                }
+                
+                
+                const totalArea = localVideoRef.current.videoWidth * localVideoRef.current.videoHeight;
+                console.log("@@", localVideoRef.current.videoWidth, localVideoRef.current.videoHeight)
+                const preds = await facemodel.estimateFaces(localVideoRef.current, false);
+                
 
-        const publishData: publishDataType = {
-            localStream: localStream,
-            localVideoRef: localVideoRef,
-            socket: socket,
-            producerTransport: producerTransport,
-            device: device
+                let facechecker = false;
+                
+                for (let i = 0; i < preds.length; i++) {
+                    let p: any = preds[i];
+
+                    const faceArea = (p.bottomRight[0] - p.topLeft[0]) * (p.bottomRight[1] - p.topLeft[1]);
+                    console.log(faceArea, totalArea);
+                    if(faceArea * 25 > totalArea){
+                        setIsFace(true);
+                        facechecker = true;
+                        break;
+                    }
+                    
+                }
+                
+                if(facechecker==false){
+                    setIsFace(false);
+                }
+                
+
+            }, 1500);
+
+
         }
 
-        VideoOn(publishData);
+        videoOnClick_();
+        
     }
 
    
@@ -109,7 +157,26 @@ const Room = (props: any) => {
         initTM();
     }, []);
 
-    
+
+    useEffect(()=>{
+        const date = new Date();
+        if(timerOn == true && isFace==false && date.getTime() - latestTime > 2000){
+            setTimerOn(false);
+            clearInterval(studyTimer.current);
+        }
+        
+        if(timerOn == false && isFace == true){
+            setTimerOn(true);
+            studyTimer.current = setInterval(() => {
+                setStudyTime((timer) => timer + 1)
+            }, 1000);
+        }
+
+    }, [isFace]);
+
+
+
+
 
 
 
