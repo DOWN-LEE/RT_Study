@@ -241,7 +241,7 @@ const Room = (props: any) => {
             /> */}
             
             
-           <h2> Time!!! {formatTime()}</h2>
+           <h2 style={{color : timerOn? 'green' : 'red'}}> Time!!! {formatTime()}</h2>
 
             {subVideos.map((videoinfo, index) => {
                 return (
