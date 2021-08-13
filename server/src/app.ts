@@ -1,7 +1,12 @@
+process.env['NODE_CONFIG_DIR'] = __dirname + '/configs';
+
 import express from 'express';
 import { Routes } from './interfaces/routes.interface';
 import { connect, set } from 'mongoose';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+
+import config from 'config';
 
 
 class App{
@@ -26,9 +31,7 @@ class App{
     }
 
     private connectToDatabase() {
-        const host = 'localhost';
-        const port = 27017;
-        const database = 'mydb';
+        const { host, database, port }: any = config.get('dbConfig');
         const url = `mongodb://${host}:${port}/${database}`;
         const options = {
             useNewUrlParser: true,
@@ -41,6 +44,7 @@ class App{
 
     private initializeMiddlewares() {
         this.app.use(bodyParser.urlencoded({extended:false}));
+        this.app.use(cookieParser());
     }
 
     private initializeRoutes(routes: Routes[]) {
