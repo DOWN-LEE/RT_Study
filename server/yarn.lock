@@ -805,10 +805,10 @@ media-typer@0.3.0:
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
   integrity sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=
 
-mediasoup@3:
-  version "3.7.19"
-  resolved "https://registry.yarnpkg.com/mediasoup/-/mediasoup-3.7.19.tgz#c077e140c4f0f7b0a64880e1997cf595cf09fc59"
-  integrity sha512-Qd7o+Nyw72Pvg6/qBp5oXY2xmSOu37RXlqKm41L3yncT7+C5KOmbgpIRgA9g11HGrvmeAsh3eXOO04et8b+//g==
+mediasoup@^3.8.2:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/mediasoup/-/mediasoup-3.8.2.tgz#7e5055b0e08ee17d1e57f58e728378bac8a1af20"
+  integrity sha512-MfppuUdrz4U/mygbhde7xBjLkfotgfCWAiI2ev8V9IymL4gzqy94N/LX7x2kER+RPi82Q/B/ZhX92ZgLDN6qGw==
   dependencies:
     "@types/node" "^14.14.43"
     awaitqueue "^2.3.3"
@@ -816,7 +816,7 @@ mediasoup@3:
     h264-profile-level-id "^1.0.1"
     netstring "^0.3.0"
     random-number "^0.0.9"
-    supports-color "^9.0.1"
+    supports-color "^9.0.2"
     uuid "^8.3.2"
 
 memory-pager@^1.0.2:
@@ -1297,7 +1297,7 @@ strip-ansi@^4.0.0:
   dependencies:
     ansi-regex "^3.0.0"
 
-supports-color@^9.0.1:
+supports-color@^9.0.2:
   version "9.0.2"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-9.0.2.tgz#50f082888e4b0a4e2ccd2d0b4f9ef4efcd332485"
   integrity sha512-ii6tc8ImGFrgMPYq7RVAMKkhPo9vk8uA+D3oKbJq/3Pk2YSMv1+9dUAesa9UxMbxBTvxwKTQffBahNVNxEvM8Q==

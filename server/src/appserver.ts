@@ -1,6 +1,6 @@
 let serverOptions = {
     hostName: 'localhost',
-    listenPort: '3002',
+    listenPort: '3001',
     useHttps: false
 };
 
@@ -693,7 +693,14 @@ const WebRtcTransportOptions: mediaSoupTypes.WebRtcTransportOptions =
 };
 
 async function startWorker() {
-    worker = await createWorker();
+    try{
+        worker = await createWorker();
+    }
+    catch (error){
+        console.log("createWorker failed");
+    }
+    
+    
     console.log('-- mediasoup worker start. --')
 }
 

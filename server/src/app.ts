@@ -15,7 +15,7 @@ class App{
 
     constructor(routes: Routes[]) {
         this.app = express();
-        this.port = 3000;
+        this.port = 3001;
         
         this.connectToDatabase();
         this.initializeMiddlewares();
