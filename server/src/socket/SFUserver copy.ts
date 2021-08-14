@@ -1,12 +1,25 @@
+import http from "http";
+import https from "https";
+import express from 'express';
+import { createWorker, types as mediaSoupTypes } from 'mediasoup';
+
+
+export function SFUstart(app: express.Application){
+    const server = http.createServer(app).listen(serverOptions.listenPort, function () {
+        console.log('Web server start. http://' + serverOptions.hostName + ':' + webServer.address().port + '/');
+    });
+    
+}
+
+
+
 let serverOptions = {
     hostName: 'localhost',
     listenPort: '3001',
     useHttps: false
 };
 
-const http = require("http");
-const https = require("https");
-const express = require('express');
+
 
 
 const app = express();
@@ -17,7 +30,7 @@ if(serverOptions.useHttps){
 
 }
 else{
-    webServer = http.Server(app).listen(serverOptions.listenPort, function () {
+    webServer = http.createServer(app).listen(serverOptions.listenPort, function () {
         console.log('Web server start. http://' + serverOptions.hostName + ':' + webServer.address().port + '/');
     });
 }
@@ -657,7 +670,7 @@ async function setupRoom(name: any) {
 
 
 
-import {createWorker, types as mediaSoupTypes} from 'mediasoup';
+
 
 let worker: mediaSoupTypes.Worker;
 const mediaCodecs: any =

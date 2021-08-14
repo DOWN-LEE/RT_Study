@@ -6,6 +6,8 @@ import { connect, set } from 'mongoose';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 
+import { SFUstart } from './socket/SFUserver';
+
 import config from 'config';
 
 
@@ -21,7 +23,7 @@ class App{
         this.initializeMiddlewares();
         this.initializeRoutes(routes);
         this.initializeErrorHandling();
-       
+        SFUstart(this.app);
     }
 
     public listen() {
