@@ -1,0 +1,8 @@
+{
+    "secretKey" : "fdsaf141dsaffg",
+    "dbConfig": {
+        "host": "localhost",
+        "database": "mongoose",
+        "port": 27017
+    }
+}
