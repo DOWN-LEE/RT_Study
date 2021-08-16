@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.12.3",
     "@tensorflow-models/blazeface": "^0.0.7",
     "@tensorflow/tfjs-backend-webgl": "^3.8.0",
     "@tensorflow/tfjs-converter": "^3.8.0",

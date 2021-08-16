@@ -29,7 +29,7 @@ const VideoContainer = Styled.video`
 
 
 const hostname = 'localhost';
-const hostport = '3002';
+const hostport = '3001';
 
 let localStream: any = null;
 let socket: any = null;

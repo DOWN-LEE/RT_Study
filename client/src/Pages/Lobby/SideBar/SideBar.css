@@ -1,0 +1,23 @@
+
+.sidebar {
+    background-color: #060b26;
+    width: 250px;
+    height:100vh;
+    padding: 10px;
+}
+
+.logoText{
+    font-size: 22px;
+    font-weight: 600;
+    color:white;
+    padding: 15px;
+    text-align: center;
+}
+
+.textInput{
+    background-color: aliceblue;
+}
+
+#loginButton{
+    height: 35px;
+}
