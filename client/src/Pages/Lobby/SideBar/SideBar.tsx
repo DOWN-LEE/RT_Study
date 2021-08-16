@@ -28,7 +28,7 @@ const SideBar = () => {
 
     return (
 
-        <nav className="sidebar">
+        <div className="sidebar">
             <div className="logoText">
                 RT_STUDY
             </div>
@@ -66,7 +66,7 @@ const SideBar = () => {
                 Log in
             </Button>
 
-        </nav>
+        </div>
 
     );
 
