@@ -1,6 +1,7 @@
 process.env['NODE_CONFIG_DIR'] = __dirname + '/configs';
 
 import express from 'express';
+import cors from 'cors';
 import { Routes } from './interfaces/routes.interface';
 import { connect, set } from 'mongoose';
 import bodyParser from 'body-parser';
@@ -47,18 +48,24 @@ class App{
     private initializeMiddlewares() {
         this.app.use(bodyParser.urlencoded({extended:false}));
         this.app.use(cookieParser());
+        this.app.use(cors());
     }
 
     private initializeRoutes(routes: Routes[]) {
         routes.forEach(route => {
             this.app.use('/', route.router);
         });
+
+        this.app.get('/index', ()=>{
+            console.log('hi~~~');
+        })
     }
 
     private initializeErrorHandling() {
         //this.app.use(errorMiddleware);
     }
 
+    
 
 }
 

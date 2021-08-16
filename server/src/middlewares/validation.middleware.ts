@@ -13,7 +13,7 @@ const validationMiddleware = (
     return (req, res, next) => {
         
         const object = plainToClass(type, req[value]);
-        
+        //console.log(req[value])
         validate(object, { skipMissingProperties, whitelist, forbidNonWhitelisted })
             .then((errors: ValidationError[]) => {
                 if (errors.length > 0) {

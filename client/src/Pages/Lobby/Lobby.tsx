@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TextField, Button, makeStyles, withStyles, Divider } from '@material-ui/core';
 import SideBar from './SideBar/SideBar';
+import { api } from '../../api/axios';
 
 import './Lobby.css';
 
@@ -21,7 +22,7 @@ const CssTextField = withStyles({
 const Lobby = () =>{
 
 
-    
+  
 
 
 
