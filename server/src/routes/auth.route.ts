@@ -8,7 +8,7 @@ import { LoginUserDto } from '../dtos/loginUsers.dto';
 import AuthController from '../controllers/auth.controller';
 
 class AuthRoute implements Routes {
-    public path = '/';
+    public path = '/auth/';
     public router = Router();
     public authController = new AuthController();
 
@@ -21,6 +21,7 @@ class AuthRoute implements Routes {
         this.router.post(`${this.path}signup`, validationMiddleware(CreateUserDto, 'body'), this.authController.signup);
         this.router.post(`${this.path}login`, validationMiddleware(LoginUserDto, 'body'), this.authController.login);
         this.router.post(`${this.path}logout`, authMiddleware, this.authController.logout);
+        this.router.get(`${this.path}auth`, authMiddleware, this.authController.auth)
     }
     
 }

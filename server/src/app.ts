@@ -1,6 +1,6 @@
 process.env['NODE_CONFIG_DIR'] = __dirname + '/configs';
 
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { Routes } from './interfaces/routes.interface';
 import { connect, set } from 'mongoose';
@@ -46,9 +46,26 @@ class App{
     }
 
     private initializeMiddlewares() {
-        this.app.use(bodyParser.urlencoded({extended:false}));
+        this.app.use(express.urlencoded({ extended:false }));
         this.app.use(cookieParser());
-        this.app.use(cors());
+        this.app.use(cors({ origin: true,  
+            credentials: true, // 크로스 도메인 허용
+         }));
+        
+        // this.app.use(function (req, res, next) {
+        //     // Website you wish to allow to connect
+        //     res.setHeader('Access-Control-Allow-Origin', '*');
+        //     // Request methods you wish to allow
+        //     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+        //     // Request headers you wish to allow
+        //     res.setHeader('Access-Control-Allow-Headers', 'Origin,X-Requested-With,content-type,set-cookie');
+        //     // Set to true if you need the website to include cookies in the requests sent
+        //     // to the API (e.g. in case you use sessions)
+        //     res.setHeader('Access-Control-Allow-Credentials', 'true');
+         
+        //     // Pass to next layer of middleware
+        //     next();
+        //   });
     }
 
     private initializeRoutes(routes: Routes[]) {
@@ -56,8 +73,9 @@ class App{
             this.app.use('/', route.router);
         });
 
-        this.app.get('/index', ()=>{
+        this.app.get('/index', (req: Request, res: Response, next: NextFunction)=>{
             console.log('hi~~~');
+            res.status(201).json({hi:"hi!"});
         })
     }
 
