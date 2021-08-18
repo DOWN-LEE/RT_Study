@@ -1,6 +1,7 @@
 import React from 'react';
 import {Route, Switch} from 'react-router-dom';
 import Room from './Pages/Room/Room';
+import Room1 from './Pages/Room/Room1';
 import Lobby from './Pages/Lobby/Lobby';
 import './App.css';
 
@@ -9,7 +10,7 @@ function App() {
     <div>
       <Switch>
         <Route path="/" exact component={Lobby} />
-        <Route path="/room/:roomname" exact component={Room}/>
+        <Route path="/room/:roomname" exact component={Room1}/>
         <Route render={() => <h1>Not Found</h1>} />
       </Switch>
     </div>

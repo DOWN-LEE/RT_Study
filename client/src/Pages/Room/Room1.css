@@ -1,0 +1,61 @@
+.header_bar{
+    background-color: #060b26;
+    width: 100vw;
+    height: 7vh;
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 1vw;
+}
+
+.total_zone{ 
+    display: flex;
+    flex-direction: row;
+}
+
+.my_zone{
+    
+    width: 60vw;
+    height: 93vh;
+    text-align: center;
+}
+
+.user_zone{
+    
+    width: 40vw;
+    height: 93vh;
+}
+
+.my_video{
+    width: 40vw;
+    height: 60vh;
+    background-color: black;
+    margin-top: 10vh;
+    margin-left: 10vw;
+
+}
+
+.my_buttons{
+    margin-left: 10vw;
+}
+
+
+
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+.today_rt{
+    color: #000000;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Orbitron';
+ 
+}
+
+.timer{
+    color: #5ee93b;
+    font-size: 60px;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 7px;
+    position: relative;
+    top: 10px;
+}
