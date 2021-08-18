@@ -1,4 +1,4 @@
-# IsStudy
+# RT_Study
 
 
 ## Planning reason and purpose
