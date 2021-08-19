@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ButtonGroup, Button, makeStyles, withStyles, createStyles, Divider, Theme, Modal, Fade, Paper } from '@material-ui/core';
+import { ButtonGroup, Button, makeStyles, withStyles, createStyles, Divider, Theme, Modal, Fade, Paper, Grid } from '@material-ui/core';
 import VideocamIcon from '@material-ui/icons/Videocam';
+import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import MicIcon from '@material-ui/icons/Mic';
+import MicOffIcon from '@material-ui/icons/MicOff';
 
 import './Room1.css';
 
@@ -13,6 +15,9 @@ const useStyles = makeStyles((theme: Theme) =>
           margin: 'auto',
           maxWidth: '40vw',
       },
+      container: {
+          height: '82vh'
+      }
   }),
 );
 
@@ -22,10 +27,54 @@ const Room1 = () => {
 
     const classes = useStyles();
 
+    const [myVideoOn, setMyVideoOn] = useState<boolean>(true);
+    const [myMicOn, setMyMicOn] = useState<boolean>(false);
+
+
+    const backClick = () => {
+
+    }
+
+    const videoIconClick = () => {
+        if(myVideoOn){
+
+        }
+        else{
+
+        }
+        setMyVideoOn(!myVideoOn);
+    }
+
+    const micIconClick = () => {
+        if(myMicOn){
+
+        }
+        else{
+
+        }
+        setMyMicOn(!myMicOn);
+    }
+
+
+    const videoIcon = () => {
+        if(!myVideoOn)
+            return (<VideocamOffIcon/>)
+        else
+            return (<VideocamIcon/>)
+    }
+
+    const micIcon = () => {
+        if(!myMicOn)
+            return (<MicOffIcon/>)
+        else
+            return (<MicIcon/>)
+    }
+
+
     return(
         <div>
             <div className='header_bar'>
-                <Button variant="contained" size="small" color='primary'>Back</Button>
+                <Button variant="contained" size="small" color='primary' onClick={()=>backClick()}>Back</Button>
             </div>
             <div className='total_zone'>
                 <div className='my_zone'>
@@ -33,9 +82,13 @@ const Room1 = () => {
                         <video className='my_video'/>
                     </div>
                     <div className='my_buttons'>
-                        <ButtonGroup variant="contained" color="primary" aria-label="outlined primary button group">
-                            <Button> <VideocamIcon/> </Button>
-                            <Button> <MicIcon/> </Button>
+                        <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                            <Button color={myVideoOn? 'primary': 'default'} onClick={()=>videoIconClick()}>
+                                {videoIcon()}
+                            </Button>
+                            <Button color={myMicOn? 'primary': 'default'} onClick={()=>micIconClick()}>
+                                {micIcon()}
+                            </Button>
                         </ButtonGroup>
                     </div>
                     <div>
@@ -46,7 +99,31 @@ const Room1 = () => {
                     
                 </div>
                 <div className='user_zone'>
-
+                    <div className='user_vidoes'>
+                        <Grid container alignItems="stretch" justifyContent="center" className={classes.container}>
+                            
+                            <Grid item md={6} >
+                                <video className='user_video'/>
+                            </Grid>
+                            <Grid item md={6} >
+                                <video className='user_video'/>
+                            </Grid>
+                            <Grid item md={6}>
+                                <video className='user_video'/>
+                            </Grid>
+                            <Grid item md={6}>
+                                <video className='user_video'/>
+                            </Grid>
+                            <Grid item md={6}>
+                                <video className='user_video'/>
+                            </Grid>
+                            <Grid item md={6}>
+                                <video className='user_video'/>
+                            </Grid>
+                            
+                            
+                        </Grid>
+                    </div>
                 </div>
             </div>
         </div>
