@@ -11,6 +11,7 @@ function App() {
       <Switch>
         <Route path="/" exact component={Lobby} />
         <Route path="/room/:roomname" exact component={Room1}/>
+        <Route path="/room1/:roomname" exact component={Room}/>
         <Route render={() => <h1>Not Found</h1>} />
       </Switch>
     </div>

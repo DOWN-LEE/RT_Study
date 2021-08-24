@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Styled from 'styled-components';
 import { Device, types as mediaSoupTypes } from 'mediasoup-client';
-import io from 'socket.io-client';
+import {io, Socket} from 'socket.io-client';
 
 import { VideoOn } from './Publish';
 import Video from './Video';
@@ -133,12 +133,14 @@ const Room = (props: any) => {
     // join
     useEffect(() => {
 
-        con();
+        
 
         async function con() {
             await connect();
             setConnectReady(true);
         }
+
+        con();
 
     }, []);
 
@@ -183,28 +185,8 @@ const Room = (props: any) => {
 
 
     const videoOnClick2 = async () => {
-        console.log("face!")
-        let ctx: any;
-        if(canvasRef.current && localVideoRef.current){
-            canvasRef.current.width = localVideoRef.current.videoWidth;
-            canvasRef.current.height = localVideoRef.current.videoHeight;
-            ctx = canvasRef.current.getContext('2d');
-        }
-        else{
-            return;
-        }
-
-        const preds = await facemodel.estimateFaces(localVideoRef.current, false);
-        console.log(preds);
-        for (let i = 0; i < preds.length; i++) {
-            let p: any = preds[i];
-            
-            ctx.fillStyle = "#00FFFF";
-            console.log("칠한다!, ", p.bottomRight[0] - p.topLeft[0],p.bottomRight[1] - p.topLeft[1])
-            ctx.fillRect(p.topLeft[0], p.topLeft[1], p.bottomRight[0] - p.topLeft[0], p.bottomRight[1] - p.topLeft[1]);
-
-        }
-
+        
+        socket.close();
 
         
     }

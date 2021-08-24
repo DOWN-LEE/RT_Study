@@ -23,6 +23,7 @@ export function SFUstart(app: express.Application){
     }
     
     const io = new Server(server, {path : '/server'});
+    app.set('io', io);
     console.log('socket.io server start. port=' + serverOptions.listenPort);
 
     io.on('connection', (socket: any) => {

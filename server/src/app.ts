@@ -6,7 +6,7 @@ import { Routes } from './interfaces/routes.interface';
 import { connect, set } from 'mongoose';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-
+import redis from 'redis';
 import { SFUstart } from './socket/SFUserver';
 
 import config from 'config';
@@ -43,6 +43,17 @@ class App{
         };
 
         connect(url, options);
+
+        const { rhost, rport, rdb }: any = config.get('redisConfig');
+        const redisClient = redis.createClient({
+            host : rhost,
+            port : rport,
+            db : rdb    
+           // password:
+        });
+
+        this.app.set("redisClient", redisClient);
+
     }
 
     private initializeMiddlewares() {
@@ -73,7 +84,7 @@ class App{
             this.app.use('/', route.router);
         });
 
-        this.app.get('/index', (req: Request, res: Response, next: NextFunction)=>{
+        this.app.get('/hi', (req: Request, res: Response, next: NextFunction)=>{
             console.log('hi~~~');
             res.status(201).json({hi:"hi!"});
         })

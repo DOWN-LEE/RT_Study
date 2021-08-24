@@ -4,5 +4,10 @@
         "host": "localhost",
         "database": "mongoose",
         "port": 27017
+    },
+    "redisConfig": {
+        "rhost": "localhost",
+        "rport" : 6379,
+        "rdb" : 0
     }
 }
