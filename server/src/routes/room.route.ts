@@ -16,6 +16,7 @@ class RoomRoute implements Routes {
 
     private initializeRoutes() {
         this.router.post(`${this.path}join`, this.roomController.join);
+        this.router.post(`${this.path}create`, this.roomController.create);
     }
     
 }

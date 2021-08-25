@@ -4,8 +4,11 @@ import VideocamIcon from '@material-ui/icons/Videocam';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
+import { api } from '../../api/axios';
 
 import './Room1.css';
+import qs from 'qs';
+import { useSelector } from 'react-redux';
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -30,9 +33,27 @@ const Room1 = () => {
     const [myVideoOn, setMyVideoOn] = useState<boolean>(true);
     const [myMicOn, setMyMicOn] = useState<boolean>(false);
 
+    const { user } = useSelector((state: any) => state.authentication)
 
     const backClick = () => {
 
+    }
+
+    const joinClick = async() => {
+        await api
+            .post('/room/join', qs.stringify({ email: user.email, roomName: '' }))
+            .then((response) => {
+                const url = response.data.data;
+                
+            })
+            .catch((error) => {
+                if(error.status == 403){ //exceed
+
+                }
+                if(error.status == 404){ //error
+
+                }
+            });
     }
 
     const videoIconClick = () => {

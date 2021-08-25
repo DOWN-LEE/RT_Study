@@ -294,8 +294,7 @@ const Room = (props: any) => {
             socket = io(serverUrl, opts);
 
             socket.on('connect', () => {
-                const roomName = getRoomName();
-                console.log('socket-client connected! room: ', roomName);
+                //sendRequest('userEmail', {email: user.email})
 
             })
 
@@ -309,10 +308,10 @@ const Room = (props: any) => {
             });
 
             socket.on('socketConnection-finish', async (message: { type: string, id: any }) => {      
-                const roomName = getRoomName();
-                await sendRequest('prepare_room', {roomId: roomName})
+                const roomId = getRoomId();
+                await sendRequest('prepare_room', {roomId: roomId})
                     .then(()=>{
-                        console.log('prepare room : ', roomName);
+                        console.log('prepare room : ', roomId);
                     });
                 
                 console.log('socketConnection-finish', message);
@@ -540,10 +539,10 @@ const Room = (props: any) => {
 
 
 
-    function getRoomName() {
+    function getRoomId() {
         
        
-        return props.match.params.roomname;
+        return props.match.params.roomId;
     }
 
 

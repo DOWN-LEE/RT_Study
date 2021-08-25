@@ -1,36 +1,55 @@
 import { NextFunction, Request, Response } from 'express';
-import { CreateUserDto } from '../dtos/users.dto';
+import { CreateRoomDto } from '../dtos/createRoom.dto';
 import { JoinRoomDto } from '../dtos/joinRoom.dto';
 import { User } from '../interfaces/users.interface';
 import AuthService from '../services/auth.service';
 import RoomService from 'services/room.service';
+import { RedisClient } from 'redis';
 import { RequestWithUser } from 'interfaces/auth.interface';
 
 class RoomController {
     public authService = new AuthService();
     public roomService = new RoomService();
 
-    public signup = async (req: Request, res: Response, next: NextFunction) => {
+
+    public join = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const userData: CreateUserDto = req.body;
-            const signUpUserData: User = await this.authService.signup(userData);
+            const joinData: JoinRoomDto = req.body;
+            const redisClient: RedisClient = req.app.get('redisClient');
+            const joinResult: string = await this.roomService.join(joinData, redisClient);
+
+            if(joinResult == 'exceed') {
+                res.sendStatus(403);
+            }
+            else if(joinResult == 'error') {
+                res.sendStatus(404);
+            }
+            else {
+                res.status(200).json({ url: joinResult });
+            }
             
-            res.status(201).json({ data: signUpUserData, message: 'signup'});
+
         } catch (error) {
             next(error);
         }
     };
 
-    public join = async (req: Request, res: Response, next: NextFunction) => {
+    public create = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const joinData: JoinRoomDto = req.body;
-            const joinResult: boolean = await this.roomService.join(joinData, req.app.get("redisClient"));
+            const createData: CreateRoomDto = req.body;
+            const redisClient: RedisClient = req.app.get('redisClient');
 
-            if(joinData) {
-                res.sendStatus(200);
+            const createResult = await this.roomService.create(createData, redisClient);
+
+            if(createResult.type == 'error') {
+                res.sendStatus(404);
             }
-
-            
+            else if(createResult.type == 'duplicate') {
+                res.sendStatus(403);
+            }
+            else if(createResult.type == 'OK'){
+                res.status(200).json({ url: createResult.url });
+            }
 
         } catch (error) {
             next(error);

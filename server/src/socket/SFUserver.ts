@@ -4,6 +4,7 @@ import express from 'express';
 import { createWorker, types as mediaSoupTypes } from 'mediasoup';
 import { AddressInfo } from "net";
 import { Server } from 'socket.io';
+import { RedisClient } from 'redis';
 
 let serverOptions = {
     hostName: 'localhost',
@@ -13,6 +14,8 @@ let serverOptions = {
 
 
 export function SFUstart(app: express.Application){
+
+    const redisClient: RedisClient = app.get('redisClient');
     let server: http.Server | https.Server;
     if(serverOptions.useHttps) {
 
@@ -28,23 +31,88 @@ export function SFUstart(app: express.Application){
 
     io.on('connection', (socket: any) => {
         console.log('client connected. socket id=' + socket.id + '  , total clients=');
+        
+        
 
 
         socket.on('disconnect', () => {
-            const roomname = getRoomname();
+            const roomname = socket.roomId;
+            const userEmail = socket.email;
+            const userName = socket.userName;
+
+
+            let room;
+            redisClient.hget('Rooms', roomname, (err, obj) => {
+                if (obj) {
+                    room = JSON.parse(obj);
+                }
+            });
+
+            room.currentMembers -= 1;
+            delete room.Members[userName];
+            redisClient.hset('Rooms', roomname, JSON.stringify(room));
+
             cleanUpPeer(roomname, socket);
             socket.leave(roomname);
+            socket.leave(userEmail);
 
+        })
+
+        socket.on('userEmail', (data: any, callback: any) => {
+            const userEmail = data.email;
+            socket.email = userEmail;
+
+            if(!userEmail){
+                callback(null, { text: '[userEmail] userEmail was not sent'});
+            }
+        
+            // 타 연결 해제
+            io.in(userEmail).emit('newConnection');
+            
+            // user socket 등록
+            socket.join(userEmail);
+
+            callback({}, null);
+            
         })
 
         socket.on('prepare_room', async (data: any, callback: any) => {
             const roomId = data.roomId;
+            const userName = data.userName;
+
+            socket.userName = userName;
+            socket.roomId = roomId;
+
             const existRoom = Room.getRoom(roomId);
             if (existRoom) {
                 console.log('--- use exist room. roomId=' + roomId);
+
+                let room;
+                redisClient.hget('Rooms', roomId, (err, obj) => {
+                    if(obj) {
+                        room = JSON.parse(obj); 
+                    }
+                    else {
+                        callback(null, { text: '[prepare_room] empty!', type:'empty'});
+                        return;
+                    }
+                });
+
+               
+                if (!room || room.limitMembers <= room.currentMembers) {
+                    callback(null, { text: '[prepare_room] exceed!', type:'exceed'});
+                    return;
+                }
+
+                room.currentMembers += 1;
+                room.Members[userName] = socket.id;
+                redisClient.hset('Rooms',roomId, JSON.stringify(room));
+                
+
             } else {
                 console.log('--- create new room. roomId=' + roomId);
                 await setupRoom(roomId);
+                
             }
 
             // --- socket.io room ---
