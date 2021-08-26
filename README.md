@@ -33,7 +33,7 @@ SFU server
 
 
 ### Frontend
-체험 : https://ovenapp.io/view/ai8vdOCvluA2BuGBglsDJ4gNdDKXK5t8/ 
+체험 : 
  
 #### tech stack
 Typescript, React, ReactHook, Webrtc, Mediasoup, socket, tensorflowJS
