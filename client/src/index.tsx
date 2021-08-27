@@ -6,13 +6,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import store from './store/store';
+import { history } from './store/store';
+import { ConnectedRouter } from 'connected-react-router';
 
 
 ReactDOM.render(
   <Provider store={store}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+
+    <ConnectedRouter history={history}>
+      <App  />
+    </ConnectedRouter>
+    
   </Provider>,
   
   document.getElementById('root')

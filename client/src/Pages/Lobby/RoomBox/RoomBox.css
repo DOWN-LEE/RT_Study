@@ -1,0 +1,12 @@
+.roomBox_title{
+    font-size: 22px;
+    height: 80%;
+    font-weight: 600;
+    
+}
+
+.roomBox_members{
+    color: rgb(158, 158, 158);
+    width: 100%;
+    text-align: right;
+}

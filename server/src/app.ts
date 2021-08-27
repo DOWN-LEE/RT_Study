@@ -7,7 +7,7 @@ import { connect, set } from 'mongoose';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import redis from 'redis';
-import { SFUstart } from './socket/SFUserver';
+import { SFUstart } from './socket/SFU';
 
 import config from 'config';
 
@@ -44,15 +44,15 @@ class App{
 
         connect(url, options);
 
-        const { rhost, rport, rdb }: any = config.get('redisConfig');
-        const redisClient = redis.createClient({
-            host : rhost,
-            port : rport,
-            db : rdb    
-           // password:
-        });
+        // const { rhost, rport, rdb }: any = config.get('redisConfig');
+        // const redisClient = redis.createClient({
+        //     host : rhost,
+        //     port : rport,
+        //     db : rdb    
+        //    // password:
+        // });
 
-        this.app.set("redisClient", redisClient);
+        // this.app.set("redisClient", redisClient);
 
     }
 

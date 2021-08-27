@@ -20,7 +20,7 @@ export class Room {
     date: string;
     router: mediaSoupTypes.Router | null;
 
-    static rooms: Map<string, Room>;
+    static rooms = new Map<string, Room>();
 
     constructor(name: string, url: string, hostEmail: string, limitMembers: number) {
         this.name = name;
@@ -39,28 +39,28 @@ export class Room {
 
     // producer transport
     getProducerTrasnport(id: string) {
-        return this.producerTransports[id];
+        return this.producerTransports.get(id);
     }
 
     addProducerTrasport(id: string, transport: mediaSoupTypes.WebRtcTransport) {
-        this.producerTransports[id] = transport;
-        console.log('room=%s producerTransports count=%d', this.name, Object.keys(this.producerTransports).length);
+        this.producerTransports.set(id, transport);
+        console.log('room=%s producerTransports count=%d', this.name, this.producerTransports.size);
     }
 
     removeProducerTransport(id: string) {
-        delete this.producerTransports[id];
-        console.log('room=%s producerTransports count=%d', this.name, Object.keys(this.producerTransports).length);
+        this.producerTransports.delete(id);
+        console.log('room=%s producerTransports count=%d', this.name, this.producerTransports.size);
     }
 
     // producer
     addProducer(id: string, producer: mediaSoupTypes.Producer, kind: string) {
         if (kind === 'video') {
-            this.videoProducers[id] = producer;
-            console.log('room=%s videoProducers count=%d', this.name, Object.keys(this.videoProducers).length);
+            this.videoProducers.set(id, producer);
+            console.log('room=%s videoProducers count=%d', this.name, this.videoProducers.size);
         }
         else if (kind === 'audio') {
-            this.audioProducers[id] = producer;
-            console.log('room=%s videoProducers count=%d', this.name, Object.keys(this.audioProducers).length);
+            this.audioProducers.set(id, producer);
+            console.log('room=%s videoProducers count=%d', this.name, this.audioProducers.size);
         }
         else {
             console.warn('UNKNOWN producer kind=' + kind);
@@ -69,12 +69,12 @@ export class Room {
 
     removeProducer(id: string, kind: string) {
         if (kind === 'video') {
-            delete this.videoProducers[id];
-            console.log('videoProducers count=' + Object.keys(this.videoProducers).length);
+            this.videoProducers.delete(id);
+            console.log('videoProducers count=' + this.videoProducers.size);
         }
         else if (kind === 'audio') {
-            delete this.audioProducers[id];
-            console.log('audioProducers count=' + Object.keys(this.audioProducers).length);
+            this.audioProducers.delete(id);
+            console.log('audioProducers count=' + this.audioProducers.size);
         }
         else {
             console.warn('UNKNOWN producer kind=' + kind);
@@ -84,14 +84,14 @@ export class Room {
     getRemoteIds(clientId: string, kind: string) {
         let producerIds = [];
         if (kind === 'video') {
-            for (const key in this.videoProducers) {
+            for (const key of this.videoProducers.keys()) {
                 if (key !== clientId) {
                     producerIds.push(key);
                 }
             }
         }
         else if (kind === 'audio') {
-            for (const key in this.audioProducers) {
+            for (const key of this.audioProducers.keys()) {
                 if (key !== clientId) {
                     producerIds.push(key);
                 }
@@ -102,10 +102,10 @@ export class Room {
 
     getProducer(id: string, kind: string) {
         if (kind === 'video') {
-            return this.videoProducers[id];
+            return this.videoProducers.get(id);
         }
         else if (kind === 'audio') {
-            return this.audioProducers[id];
+            return this.audioProducers.get(id);
         }
         else {
             console.warn('UNKNOWN producer kind=' + kind);
@@ -114,26 +114,26 @@ export class Room {
 
     // consumer transport
     getConsumerTrasnport(id: any) {
-        return this.consumerTransports[id];
+        return this.consumerTransports.get(id);
     }
 
     addConsumerTrasport(id: any, transport: mediaSoupTypes.WebRtcTransport) {
-        this.consumerTransports[id] = transport;
-        console.log('room=%s add consumerTransports count=%d', this.name, Object.keys(this.consumerTransports).length);
+        this.consumerTransports.set(id, transport)
+        console.log('room=%s add consumerTransports count=%d', this.name, this.consumerTransports.size);
     }
 
     removeConsumerTransport(id: any) {
-        delete this.consumerTransports[id];
-        console.log('room=%s remove consumerTransports count=%d', this.name, Object.keys(this.consumerTransports).length);
+        this.consumerTransports.delete(id);
+        console.log('room=%s remove consumerTransports count=%d', this.name, this.consumerTransports.size);
     }
 
     // consumer set
     getConsumerSet(localId: any, kind: string) {
         if (kind === 'video') {
-            return this.videoConsumerSets[localId];
+            return this.videoConsumerSets.get(localId);
         }
         else if (kind === 'audio') {
-            return this.audioConsumerSets[localId];
+            return this.audioConsumerSets.get(localId);
         }
         else {
             console.warn('WARN: getConsumerSet() UNKNWON kind=%s', kind);
@@ -142,10 +142,10 @@ export class Room {
 
     addConsumerSet(localId: any, set: any, kind: string) {
         if (kind === 'video') {
-            this.videoConsumerSets[localId] = set;
+            this.videoConsumerSets.set(localId, set);
         }
         else if (kind === 'audio') {
-            this.audioConsumerSets[localId] = set;
+            this.audioConsumerSets.set(localId, set);
         }
         else {
             console.warn('WARN: addConsumerSet() UNKNWON kind=%s', kind);
@@ -154,27 +154,27 @@ export class Room {
 
     removeConsumerSetDeep(localId: any) {
         const videoSet = this.getConsumerSet(localId, 'video');
-        delete this.videoConsumerSets[localId];
+        this.videoConsumerSets.delete(localId);
         if (videoSet) {
-            for (const key in videoSet) {
-                const consumer = videoSet[key];
+            for (const key of videoSet.keys()){
+                const consumer = videoSet.get(key);
                 consumer.close();
-                delete videoSet[key];
+                videoSet.delete(key);
             }
 
-            console.log('room=%s removeConsumerSetDeep video consumers count=%d', this.name, Object.keys(videoSet).length);
+            console.log('room=%s removeConsumerSetDeep video consumers count=%d', this.name, videoSet.size);
         }
 
         const audioSet = this.getConsumerSet(localId, 'audio');
-        delete this.audioConsumerSets[localId];
+        this.audioConsumerSets.delete(localId);
         if (audioSet) {
-            for (const key in audioSet) {
-                const consumer = audioSet[key];
+            for (const key of audioSet.keys()) {
+                const consumer = audioSet.get(key);
                 consumer.close();
-                delete audioSet[key];
+                audioSet.delete(key);
             }
 
-            console.log('room=%s removeConsumerSetDeep audio consumers count=%d', this.name, Object.keys(audioSet).length);
+            console.log('room=%s removeConsumerSetDeep audio consumers count=%d', this.name, audioSet.size);
         }
     }
 
@@ -183,23 +183,23 @@ export class Room {
     addConsumer(localId: any, remoteId: any, consumer: mediaSoupTypes.Consumer, kind: string) {
         const set = this.getConsumerSet(localId, kind);
         if (set) {
-            set[remoteId] = consumer;
-            console.log('room=%s consumers kind=%s count=%d', this.name, kind, Object.keys(set).length);
+            set.set(remoteId, consumer);
+            console.log('room=%s consumers kind=%s count=%d', this.name, kind, set.size);
         }
         else {
             console.log('room=%s new set for kind=%s, localId=%s', this.name, kind, localId);
-            const newSet: any = {};
-            newSet[remoteId] = consumer;
+            const newSet = new Map<string, mediaSoupTypes.Consumer>();
+            newSet.set(remoteId, consumer);
             this.addConsumerSet(localId, newSet, kind);
-            console.log('room=%s consumers kind=%s count=%d', this.name, kind, Object.keys(newSet).length);
+            console.log('room=%s consumers kind=%s count=%d', this.name, kind, newSet.size);
         }
     }
 
     removeConsumer(localId: any, remoteId: any, kind: string) {
         const set = this.getConsumerSet(localId, kind);
         if (set) {
-            delete set[remoteId];
-            console.log('room=%s consumers kind=%s count=%d', this.name, kind, Object.keys(set).length);
+            set.delete(remoteId);
+            console.log('room=%s consumers kind=%s count=%d', this.name, kind, set.size);
         }
         else {
             console.log('NO set for room=%s kind=%s, localId=%s', this.name, kind, localId);
@@ -209,7 +209,7 @@ export class Room {
     getConsumer(localId: any, remoteId: any, kind: string) {
         const set = this.getConsumerSet(localId, kind);
         if (set) {
-            return set[remoteId];
+            return set.get(remoteId);
         }
         else {
             return null;
@@ -220,27 +220,28 @@ export class Room {
 
     // members
     addMember(userName: string, socketid: string) {
-        this.Members[userName] = socketid;
+        this.Members.set(userName, socketid);
     }
 
     removeMember(userName: string) {
-        delete this.Members[userName];
+        this.Members.delete(userName);
     }
 
 
 
 
     static addRoom(room: Room, url: string) {
-        Room.rooms[url] = room;
+        console.log("@@@ gi!", Room.rooms)
+        Room.rooms.set(url, room);
         console.log('static addRoom. name=%s', room.name);
     }
 
     static getRoom(url: string): Room {
-        return Room.rooms[url];
+        return Room.rooms.get(url);
     }
 
     static removeRoom(url: string) {
-        delete Room.rooms[url];
+        Room.rooms.delete(url);
     }
 
 }

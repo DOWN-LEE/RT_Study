@@ -23,6 +23,8 @@
     "@types/react-router-dom": "^5.1.8",
     "@types/socket.io-client": "^3.0.0",
     "axios": "^0.21.1",
+    "connected-react-router": "^6.9.1",
+    "history": "4.10.1",
     "http-proxy-middleware": "^2.0.1",
     "mediasoup-client": "^3.6.36",
     "qs": "^6.10.1",

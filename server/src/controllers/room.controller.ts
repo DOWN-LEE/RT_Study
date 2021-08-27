@@ -3,7 +3,7 @@ import { CreateRoomDto } from '../dtos/createRoom.dto';
 import { JoinRoomDto } from '../dtos/joinRoom.dto';
 import { User } from '../interfaces/users.interface';
 import AuthService from '../services/auth.service';
-import RoomService from 'services/room.service';
+import RoomService from '../services/room.service';
 import { RedisClient } from 'redis';
 import { RequestWithUser } from 'interfaces/auth.interface';
 
@@ -18,15 +18,10 @@ class RoomController {
             //const redisClient: RedisClient = req.app.get('redisClient');
             const joinResult= await this.roomService.join(joinData);
 
-            if(joinResult.type == 'exceed') {
-                res.sendStatus(403);
-            }
-            else if(joinResult.type == 'error') {
-                res.sendStatus(404);
-            }
-            else {
-                res.status(200).json({ data: joinResult.url, message: 'url'});
-            }
+            
+            
+            res.status(200).json({ data: joinResult.url, message: 'url'});
+            
             
 
         } catch (error) {
@@ -41,15 +36,10 @@ class RoomController {
 
             const createResult = await this.roomService.create(createData);
 
-            if(createResult.type == 'error') {
-                res.sendStatus(404);
-            }
-            else if(createResult.type == 'duplicate') {
-                res.sendStatus(403);
-            }
-            else if(createResult.type == 'OK'){
-                res.status(200).json({ data: createResult.url, message: 'url' });
-            }
+    
+           
+            res.status(200).json({ data: createResult.url, message: 'url' });
+            
 
         } catch (error) {
             next(error);

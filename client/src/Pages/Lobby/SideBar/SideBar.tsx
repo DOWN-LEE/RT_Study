@@ -75,8 +75,7 @@ const SideBar = () => {
             return;
         }
 
-        await api
-            .post('/auth/login/', qs.stringify({ email: userId, password: password }))
+        await api.post('/auth/login/', qs.stringify({ email: userId, password: password }))
             .then((response) => {
                 dispatch(tryLogin(response.data.data));
             })

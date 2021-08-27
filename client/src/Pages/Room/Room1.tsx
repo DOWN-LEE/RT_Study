@@ -9,6 +9,7 @@ import { api } from '../../api/axios';
 import './Room1.css';
 import qs from 'qs';
 import { useSelector } from 'react-redux';
+import { History } from 'history';
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -24,8 +25,11 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+interface app {
+    history: History
+}
 
-const Room1 = () => {
+const Room1 = (props: app) => {
 
 
     const classes = useStyles();
@@ -36,7 +40,7 @@ const Room1 = () => {
     const { user } = useSelector((state: any) => state.authentication)
 
     const backClick = () => {
-
+        props.history.push('/');
     }
 
     const joinClick = async() => {
@@ -44,7 +48,7 @@ const Room1 = () => {
             .post('/room/join', qs.stringify({ email: user.email, roomName: '' }))
             .then((response) => {
                 const url = response.data.data;
-                
+
             })
             .catch((error) => {
                 if(error.status == 403){ //exceed

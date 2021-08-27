@@ -4,8 +4,9 @@ import { RedisClient } from 'redis';
 import { RedisRoomDto } from '../dtos/room.dto';
 import { Server } from 'socket.io';
 import { Request } from 'express';
+import { HttpException } from '../exceptions/HttpException';
 import crypto from 'crypto'
-import { Room, setupRoom } from '../socket/new/room/room';
+import { Room, setupRoom } from '../socket/room/room';
 
 class RoomService {
 
@@ -16,30 +17,29 @@ class RoomService {
             
             const roomName = joinData.roomName;
             
-            for(const key in Room.rooms) {
-                if(roomName == Room.rooms.get(key).name){
-                    const room = Room.rooms.get(key);
+            for(const room of Room.rooms.values()) {
+                if(roomName == room.name){
                     if(room.limitMembers <= room.Members.size){
-                        return { type: 'exceed' };
+                        throw new HttpException(403, 'exceed!');
                     }
                     return {type : 'OK', url : room.url };
                 }
             }
 
             
-            return { type: 'error' };
+            new HttpException(404, 'error');
             
         } catch (error) {
-            return { type: 'error' };
+            new HttpException(404, 'error');
         }
     }
 
     public async create(createData: CreateRoomDto){
         try {
             // 중복검사
-            for(const key in Room.rooms) {
-                if(createData.roomName == Room.rooms.get(key).name){
-                    return { type: 'duplicate' };
+            for(const room of Room.rooms.values()) {
+                if(createData.roomName == room.name){
+                    throw new HttpException(403, 'duplicate!');
                 }
             }
 
@@ -63,15 +63,14 @@ class RoomService {
             
            
         } catch (error) {
-            return { type: 'error' };
+            throw new HttpException(404, 'error!');
         }
     }
 
     public list() {
-
+        
         const result = [];
-        for(const key in Room.rooms) {
-            const room = Room.rooms.get(key);
+        for(const room of Room.rooms.values()) {
             result.push({
                 name: room.name,
                 limitMembers: room.limitMembers,
