@@ -9,5 +9,15 @@
         "rhost": "localhost",
         "rport" : 6379,
         "rdb" : 0
-    }
+    },
+
+    "SFUoptions" : {
+        "hostName": "localhost",
+        "listenPort": "3001",
+        "useHttps": false
+    },
+
+    "MediaWorkers" : 2
+
+    
 }

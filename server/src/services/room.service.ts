@@ -5,70 +5,83 @@ import { RedisRoomDto } from '../dtos/room.dto';
 import { Server } from 'socket.io';
 import { Request } from 'express';
 import crypto from 'crypto'
+import { Room, setupRoom } from '../socket/new/room/room';
 
 class RoomService {
 
 
-    public async join(joinData: JoinRoomDto, redisClient: RedisClient): Promise<string> {
+    public async join(joinData: JoinRoomDto) {
         try {
          
             
             const roomName = joinData.roomName;
             
-            let room: RedisRoomDto;
-
-            redisClient.hget('Rooms', roomName, (err, obj) => {
-                if(obj) {
-                    room = JSON.parse(obj);
+            for(const key in Room.rooms) {
+                if(roomName == Room.rooms.get(key).name){
+                    const room = Room.rooms.get(key);
+                    if(room.limitMembers <= room.Members.size){
+                        return { type: 'exceed' };
+                    }
+                    return {type : 'OK', url : room.url };
                 }
-            });
-
-            if (!room || room.limitMembers <= room.currentMembers) {
-                return 'exceed';
             }
 
-            return room.roomUrl;
+            
+            return { type: 'error' };
+            
         } catch (error) {
-            return 'error';
+            return { type: 'error' };
         }
     }
 
-    public async create(createData: CreateRoomDto, redisClient: RedisClient){
+    public async create(createData: CreateRoomDto){
         try {
             // 중복검사
-            redisClient.hgetall('Rooms', (err, obj) => {
-                for(const key in obj) {
-                    const value = JSON.parse(obj[key]);
-                    if(value.roomName == createData.roomName){
-                        return { type: 'duplicate' };
-                    }
+            for(const key in Room.rooms) {
+                if(createData.roomName == Room.rooms.get(key).name){
+                    return { type: 'duplicate' };
                 }
-            });
+            }
 
-            let newRoom: RedisRoomDto;
-            newRoom.roomName = createData.roomName;
-            newRoom.limitMembers = createData.limitMembers;
-            newRoom.hostEmail = createData.hostEmail;
-            newRoom.currentMembers = 0;
-            newRoom.Members = {};
-
+            const roomName = createData.roomName;
+            const hostEmail = createData.hostEmail;
+            const limitMembers = createData.limitMembers;
+            
             const today = new Date();
             const hours = ('0' + today.getHours()).slice(-2);
             const minutes = ('0' + today.getMinutes()).slice(-2);
             const seconds = ('0' + today.getSeconds()).slice(-2);
             const timeString = hours + ':' + minutes + ':' + seconds;
-            newRoom.date = timeString;
+            const date = timeString;
+  
+            const roomUrl = crypto.createHash('md5').update(date + roomName).digest("hex");
 
-            newRoom.roomUrl = crypto.createHash('md5').update(newRoom.date + newRoom.roomName).digest("hex");
+            setupRoom(roomName, roomUrl, hostEmail, limitMembers);
 
-            redisClient.hset('Rooms', newRoom.roomUrl, JSON.stringify(newRoom));
 
-            return { type: 'OK', url: newRoom.roomUrl};
+            return { type: 'OK', url: roomUrl};
             
            
         } catch (error) {
             return { type: 'error' };
         }
+    }
+
+    public list() {
+
+        const result = [];
+        for(const key in Room.rooms) {
+            const room = Room.rooms.get(key);
+            result.push({
+                name: room.name,
+                limitMembers: room.limitMembers,
+                currentMembers: room.Members.size,
+
+            })
+        }
+
+        return result;
+
     }
 
 

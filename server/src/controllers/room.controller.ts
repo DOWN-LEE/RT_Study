@@ -15,17 +15,17 @@ class RoomController {
     public join = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const joinData: JoinRoomDto = req.body;
-            const redisClient: RedisClient = req.app.get('redisClient');
-            const joinResult: string = await this.roomService.join(joinData, redisClient);
+            //const redisClient: RedisClient = req.app.get('redisClient');
+            const joinResult= await this.roomService.join(joinData);
 
-            if(joinResult == 'exceed') {
+            if(joinResult.type == 'exceed') {
                 res.sendStatus(403);
             }
-            else if(joinResult == 'error') {
+            else if(joinResult.type == 'error') {
                 res.sendStatus(404);
             }
             else {
-                res.status(200).json({ url: joinResult });
+                res.status(200).json({ data: joinResult.url, message: 'url'});
             }
             
 
@@ -37,9 +37,9 @@ class RoomController {
     public create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const createData: CreateRoomDto = req.body;
-            const redisClient: RedisClient = req.app.get('redisClient');
+            //const redisClient: RedisClient = req.app.get('redisClient');
 
-            const createResult = await this.roomService.create(createData, redisClient);
+            const createResult = await this.roomService.create(createData);
 
             if(createResult.type == 'error') {
                 res.sendStatus(404);
@@ -48,13 +48,23 @@ class RoomController {
                 res.sendStatus(403);
             }
             else if(createResult.type == 'OK'){
-                res.status(200).json({ url: createResult.url });
+                res.status(200).json({ data: createResult.url, message: 'url' });
             }
 
         } catch (error) {
             next(error);
         }
     };
+
+    public list = (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const getlist = this.roomService.list();
+            res.status(200).json({ data: getlist, message: 'list'});
+
+        } catch (error) {
+            next(error);
+        }
+    }
 
 }
 
