@@ -14,7 +14,7 @@ removeConsumerTransport, removeProducerTransport } from './request/requests';
 
 export function run(app: express.Application){
 
-    const redisClient: RedisClient = app.get('redisClient');
+    //const redisClient: RedisClient = app.get('redisClient');
     let server: http.Server | https.Server;
     const serverOptions: any = config.get('SFUoptions');
 

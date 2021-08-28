@@ -8,6 +8,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import redis from 'redis';
 import { SFUstart } from './socket/SFU';
+import { SFUstart as sf } from './socket/SFUserver';
 
 import config from 'config';
 

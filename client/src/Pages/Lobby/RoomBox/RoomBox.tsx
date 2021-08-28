@@ -28,15 +28,21 @@ interface box {
     name: string,
     currentMembers: number,
     limitMembers: number,
-    history: History
+    history: History,
+    setCreateWrong:any
 }
 
 const RoomBox = (props: box) => {
 
     const classes = useStyles();
-    const { user } = useSelector((state: any) => state.authentication)
+    const { loggingIn, user } = useSelector((state: any) => state.authentication)
 
     const roomBoxClick = () => {
+
+        if(loggingIn!=true){
+            props.setCreateWrong(true);
+            return;
+        }
         
         api.post('/room/join/',qs.stringify({email: user.email, roomName: props.name}))
             .then((response) => {  

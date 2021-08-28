@@ -52,13 +52,13 @@ interface box {
 interface app {
     history: History
 }
-  
+
 
 const Lobby = (props: app) => {
 
     const [createWrong, setCreateWrong] = useState<boolean>(false);
     const [rooms, setRooms] = useState<Array<box>>([]);
-
+    const [refreshTimer, setRefreshTimer] = useState<number>(0);
     const [createModel, setCreateModel] = useState<boolean>(false);
     const [createRoomTitle, setCreateRoomTitle] = useState<string>('');
     const [createLimit, setCreateLimit] = useState<number>(4);
@@ -77,8 +77,17 @@ const Lobby = (props: app) => {
             });
     }, []);
 
+    useEffect(() => {
+        if(refreshTimer > 0){
+            setTimeout(() => setRefreshTimer(refreshTimer-1), 1000);
+        }
+    }, [refreshTimer]);
 
-    const refreshClick = () => {
+
+    const refreshClick = async () => {
+        if (refreshTimer != 0)
+            return;
+
         api.get('/room/list/')
             .then((response) => {
                 setRooms(response.data.data);
@@ -86,7 +95,24 @@ const Lobby = (props: app) => {
             .catch((error) => {
                 console.log(error);
             });
+
+        setRefreshTimer(5);
+        
     };
+
+    const refreshIcon = () => {
+
+        if (refreshTimer == 0) {
+            return (<RefreshIcon />)
+        }
+        else {
+            return (
+                <div style={{ fontWeight: 700 }}>
+                    {refreshTimer}
+                </div>
+            )
+        }
+    }
 
     const createClick = () => {
         if (loggingIn != true) {
@@ -121,6 +147,8 @@ const Lobby = (props: app) => {
     }
 
 
+
+
     return (
         <div className='Lobby_draw' style={{ flexDirection: 'row' }}>
 
@@ -133,7 +161,7 @@ const Lobby = (props: app) => {
                 <div className='Lobby_top'>
                     <div className='Lobby_text'> Lobby </div>
                     <div className='Lobby_create'>
-                        <Button onClick={()=>refreshClick()}><RefreshIcon/></Button>
+                        <Button onClick={() => refreshClick()}>{refreshIcon()}</Button>
                         <Button variant="contained" color="primary" onClick={() => createClick()}>  Create! </Button>
 
                         <Modal
@@ -207,6 +235,7 @@ const Lobby = (props: app) => {
                         currentMembers={room.currentMembers}
                         limitMembers={room.limitMembers}
                         history={props.history}
+                        setCreateWrong={setCreateWrong}
                         key={i} />)}
 
                 </Grid>

@@ -231,7 +231,6 @@ export class Room {
 
 
     static addRoom(room: Room, url: string) {
-        console.log("@@@ gi!", Room.rooms)
         Room.rooms.set(url, room);
         console.log('static addRoom. name=%s', room.name);
     }

@@ -15,7 +15,7 @@ let serverOptions = {
 
 export function SFUstart(app: express.Application){
 
-    const redisClient: RedisClient = app.get('redisClient');
+    //const redisClient: RedisClient = app.get('redisClient');
     let server: http.Server | https.Server;
     if(serverOptions.useHttps) {
 
@@ -25,7 +25,7 @@ export function SFUstart(app: express.Application){
         });
     }
     
-    const io = new Server(server, {path : '/server'});
+    const io = new Server(server, {path : '/server/'});
     app.set('io', io);
     console.log('socket.io server start. port=' + serverOptions.listenPort);
 
@@ -42,15 +42,15 @@ export function SFUstart(app: express.Application){
 
 
             let room;
-            redisClient.hget('Rooms', roomname, (err, obj) => {
-                if (obj) {
-                    room = JSON.parse(obj);
-                }
-            });
+            // redisClient.hget('Rooms', roomname, (err, obj) => {
+            //     if (obj) {
+            //         room = JSON.parse(obj);
+            //     }
+            // });
 
-            room.currentMembers -= 1;
-            delete room.Members[userName];
-            redisClient.hset('Rooms', roomname, JSON.stringify(room));
+            // room.currentMembers -= 1;
+            // delete room.Members[userName];
+            // redisClient.hset('Rooms', roomname, JSON.stringify(room));
 
             cleanUpPeer(roomname, socket);
             socket.leave(roomname);
@@ -87,26 +87,26 @@ export function SFUstart(app: express.Application){
             if (existRoom) {
                 console.log('--- use exist room. roomId=' + roomId);
 
-                let room;
-                redisClient.hget('Rooms', roomId, (err, obj) => {
-                    if(obj) {
-                        room = JSON.parse(obj); 
-                    }
-                    else {
-                        callback(null, { text: '[prepare_room] empty!', type:'empty'});
-                        return;
-                    }
-                });
+                // let room;
+                // redisClient.hget('Rooms', roomId, (err, obj) => {
+                //     if(obj) {
+                //         room = JSON.parse(obj); 
+                //     }
+                //     else {
+                //         callback(null, { text: '[prepare_room] empty!', type:'empty'});
+                //         return;
+                //     }
+                // });
 
                
-                if (!room || room.limitMembers <= room.currentMembers) {
-                    callback(null, { text: '[prepare_room] exceed!', type:'exceed'});
-                    return;
-                }
+                // if (!room || room.limitMembers <= room.currentMembers) {
+                //     callback(null, { text: '[prepare_room] exceed!', type:'exceed'});
+                //     return;
+                // }
 
-                room.currentMembers += 1;
-                room.Members[userName] = socket.id;
-                redisClient.hset('Rooms',roomId, JSON.stringify(room));
+                // room.currentMembers += 1;
+                // room.Members[userName] = socket.id;
+                // redisClient.hset('Rooms',roomId, JSON.stringify(room));
                 
 
             } else {
