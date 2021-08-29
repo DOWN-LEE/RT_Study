@@ -36,7 +36,7 @@ export class Room {
         this.Members = new Map<string, string>();
         this.router = null;
     }
-
+    
     // producer transport
     getProducerTrasnport(id: string) {
         return this.producerTransports.get(id);
@@ -60,6 +60,7 @@ export class Room {
         }
         else if (kind === 'audio') {
             this.audioProducers.set(id, producer);
+            this.audioProducers.get(id).pause();
             console.log('room=%s videoProducers count=%d', this.name, this.audioProducers.size);
         }
         else {

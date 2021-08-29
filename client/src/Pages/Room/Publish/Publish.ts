@@ -19,7 +19,7 @@ export class Publish {
 
     async publish(videoOn: boolean, micOn: boolean) {
 
-        await navigator.mediaDevices.getUserMedia({ video: videoOn, audio: micOn })
+        await navigator.mediaDevices.getUserMedia({ video: videoOn, audio: micOn }) //TODO
             .then((stream: any) => {
                 this.localStream = stream;
                 this.playVideo(this.localVideoRef, this.localStream);
@@ -80,7 +80,7 @@ export class Publish {
             const trackParams = { track: videoTrack };
             await this.producerTransport.produce(trackParams);
         }
-
+    
 
         const audioTrack = this.localStream.getAudioTracks()[0];
         if (audioTrack) {

@@ -258,6 +258,40 @@ export function run(app: express.Application){
 
 
 
+        //~~~~~~~~~~~~~~~~~~~~~~ ON/ OFF
+        socket.on('myVideoOff', (data: any, callback: any) => {
+            const roomname = getRoomname();
+            const producer = getProducer(roomname, socket.id, 'video');
+            if(!producer.paused){
+                producer.pause();
+            }
+        });
+
+        socket.on('myVideoOn', (data: any, callback: any) => {
+            const roomname = getRoomname();
+            const producer = getProducer(roomname, socket.id, 'video');
+            if(producer.paused){
+                producer.resume();
+            }
+        });
+
+        socket.on('myAudioOff', (data: any, callback: any) => {
+            const roomname = getRoomname();
+            const producer = getProducer(roomname, socket.id, 'audio');
+            if(!producer.paused){
+                producer.pause();
+            }
+        });
+
+        socket.on('myAudioOn', (data: any, callback: any) => {
+            const roomname = getRoomname();
+            const producer = getProducer(roomname, socket.id, 'audio');
+            if(producer.paused){
+                producer.resume();
+            }
+        });
+
+
 
         function setRoomname(room: string) {
             socket.roomname = room;

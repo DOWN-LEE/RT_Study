@@ -18,11 +18,9 @@ const VideoContainer = Styled.video`
 
 interface Props {
     stream: any,
-    keys: any,
-    id: any
 }
 
-const Video = ({stream, keys, id}: Props) => {
+const Video = ({stream}: Props) => {
     const ref = useRef<HTMLVideoElement>(null);
   
 
@@ -31,19 +29,30 @@ const Video = ({stream, keys, id}: Props) => {
             ref.current.srcObject = stream;
             
         }
-        console.log("key: ",keys," id:",id);
+        
         
     })
 
+    // return (
+    //     <Container>
+    //         <VideoContainer 
+    //             ref={ref}
+    //             controls
+    //             autoPlay
+    //         ></VideoContainer>
+    //     </Container>
+    // );
+
     return (
-        <Container>
-            <VideoContainer 
-                ref={ref}
-                controls
-                autoPlay
-            ></VideoContainer>
-        </Container>
-    );
+        <video
+            className='user_video'
+            
+            autoPlay
+            ref = {ref}
+        >
+
+        </video>
+    )
 }
 
 export default Video;

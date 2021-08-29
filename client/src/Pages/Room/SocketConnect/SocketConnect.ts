@@ -1,6 +1,6 @@
 import { Device, types as mediaSoupTypes } from 'mediasoup-client';
 import {io, Socket} from 'socket.io-client';
-
+import { Subsribe } from '../Subscribe/Subscribe';
 
 const hostname = 'localhost';
 const hostport = '3001';
@@ -9,6 +9,7 @@ export class SocketConnect {
     public socket: Socket;
     public socketId: string = '';
     public roomUrl: string;
+    public subscribe!: Subsribe;
 
     constructor(url: string) {
         const serverUrl = `http://${hostname}:${hostport}`;
@@ -19,6 +20,10 @@ export class SocketConnect {
 
         this.socket = io(serverUrl, opts);
         this.roomUrl = url;
+    }
+
+    setSubscribe(subscribe: Subsribe) {
+        this.subscribe = subscribe;
     }
 
     connectSocket() {
@@ -60,31 +65,30 @@ export class SocketConnect {
                 }
             });
 
-            // this.socket.on('newProducer', function (message: any) {
-            //     console.log('socket.io newProducer:', message);
-            //     const remoteId = message.socketId;
-            //     const prdId = message.producerId;
-            //     const kind = message.kind;
-            //     if (kind === 'video') {
-            //         console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
-            //         consumeAdd(consumerTransport, remoteId, prdId, kind);
-            //     }
-            //     else if (kind === 'audio') {
-            //         //console.warn('-- audio NOT SUPPORTED YET. skip remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
-            //         console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
-            //         consumeAdd(consumerTransport, remoteId, prdId, kind);
-            //     }
-            // });
+            this.socket.on('newProducer',  (message: any) => {
+                console.log('socket.io newProducer:', message);
+                const remoteId = message.socketId;
+                const prdId = message.producerId;
+                const kind = message.kind;
+                if (kind === 'video') {
+                    console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
+                    this.subscribe.consumeAdd(this.subscribe.consumerTransport, remoteId, prdId, kind);
+                }
+                else if (kind === 'audio') {
+                    console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
+                    this.subscribe.consumeAdd(this.subscribe.consumerTransport, remoteId, prdId, kind);
+                }
+            });
 
-            // this.socket.on('producerClosed', function (message: any) {
-            //     console.log('socket.io producerClosed:', message);
-            //     const localId = message.localId;
-            //     const producereId = message.producereId;
-            //     const kind = message.kind;
-            //     console.log('--try removeConsumer remoteId=%s, localId=%s, track=%s', producereId, localId, kind);
-            //     removeConsumer(producereId, kind);
-            //     removeRemoteVideo(producereId);
-            // })
+            this.socket.on('producerClosed', (message: any) => {
+                console.log('socket.io producerClosed:', message);
+                const localId = message.localId;
+                const producereId = message.producereId;
+                const kind = message.kind;
+                console.log('--try removeConsumer remoteId=%s, localId=%s, track=%s', producereId, localId, kind);
+                this.subscribe.removeConsumer(producereId, kind);
+                this.subscribe.removeRemoteVideo(producereId);
+            })
 
         })
     }

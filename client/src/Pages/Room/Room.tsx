@@ -225,16 +225,16 @@ const Room = (props: any) => {
             
            <h2 style={{color : timerOn? 'green' : 'red'}}> Time!!! {formatTime()}</h2>
 
-            {subVideos.map((videoinfo, index) => {
+            {/* {subVideos.map((videoinfo, index) => {
                 return (
-                    <Video
-                        key={index}
-                        keys={index}
-                        stream={videoinfo.stream}
-                        id={videoinfo.id}
-                    />
+                    // <Video
+                    //     key={index}
+                    //     keys={index}
+                    //     stream={videoinfo.stream}
+                    //     id={videoinfo.id}
+                    // />
                 )})
-            }
+            } */}
 
             <h1>{status}</h1>
 
