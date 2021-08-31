@@ -45,15 +45,15 @@ class App{
 
         connect(url, options);
 
-        // const { rhost, rport, rdb }: any = config.get('redisConfig');
-        // const redisClient = redis.createClient({
-        //     host : rhost,
-        //     port : rport,
-        //     db : rdb    
-        //    // password:
-        // });
+        const { rhost, rport, rdb }: any = config.get('redisConfig');
+        const redisClient = redis.createClient({
+            host : rhost,
+            port : rport,
+            db : rdb    
+           // password:
+        });
 
-        // this.app.set("redisClient", redisClient);
+        this.app.set("redisClient", redisClient);
 
     }
 

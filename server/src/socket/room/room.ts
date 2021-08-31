@@ -16,7 +16,8 @@ export class Room {
     consumerTransports: Map<string, mediaSoupTypes.WebRtcTransport>;
     videoConsumerSets: Map<string, Map<string, mediaSoupTypes.Consumer>>;
     audioConsumerSets: Map<string, Map<string, mediaSoupTypes.Consumer>>;
-    Members: Map<string, string>; 
+    producerUserName: Map<string, string>;
+    Members: {[key: string]: string}; 
     date: string;
     router: mediaSoupTypes.Router | null;
 
@@ -30,10 +31,11 @@ export class Room {
         this.producerTransports = new Map<string, mediaSoupTypes.WebRtcTransport>();
         this.videoProducers = new Map<string, mediaSoupTypes.Producer>();
         this.audioProducers = new Map<string, mediaSoupTypes.Producer>();
+        this.producerUserName = new Map<string, string>();
         this.consumerTransports = new Map<string, mediaSoupTypes.WebRtcTransport>();
         this.videoConsumerSets = new Map<string, Map<string, mediaSoupTypes.Consumer>>();
         this.audioConsumerSets = new Map<string, Map<string, mediaSoupTypes.Consumer>>();
-        this.Members = new Map<string, string>();
+        this.Members = {};
         this.router = null;
     }
     
@@ -220,12 +222,12 @@ export class Room {
 
 
     // members
-    addMember(userName: string, socketid: string) {
-        this.Members.set(userName, socketid);
+    addMember(socketid: string, userName: string) {
+        this.Members[socketid] = userName;
     }
 
-    removeMember(userName: string) {
-        this.Members.delete(userName);
+    removeMember(socketid: string) {
+        delete this.Members[socketid];
     }
 
 

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ButtonGroup, Button, makeStyles, withStyles, createStyles, Divider, Theme, Modal, Fade, Paper, Grid } from '@material-ui/core';
+import { Button, makeStyles, createStyles, Theme, Grid } from '@material-ui/core';
 
-import { api } from '../../api/axios';
+
 import { Device, types as mediaSoupTypes } from 'mediasoup-client';
-import {io, Socket} from 'socket.io-client';
+
 
 import { SocketConnect } from './SocketConnect/SocketConnect';
 
@@ -12,12 +12,17 @@ import { Subsribe } from './Subscribe/Subscribe';
 
 import { userVideo, app } from './@type/index';
 import './Room1.css';
-import qs from 'qs';
-import { useSelector } from 'react-redux';
+
 
 import MyVideo from './Video/MyVideo';
-import  Video from './Video';
+import UserVideo from './Video/UserVideo';
 
+import { useDispatch, useSelector } from 'react-redux';
+
+
+
+
+import { checkLogin, tryLogout, tryLogin } from '../../store/authentication/authentication';
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -45,36 +50,30 @@ let device: Device;
 const Room1 = (props: app) => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
-
-    // let localStream: any = null;
-    // let socket: Socket;
-    // let socketId: string;
-    // let consumerTransport: mediaSoupTypes.Transport;
-    // let producerTransport: mediaSoupTypes.Transport;
-    // let device: mediaSoupTypes.Device;
-    // let videoConsumers: any = { };
-    // let audioConsumers: any = { };
-
-    // let mediaStreams: any = { };
-
-    // let facemodel: blazeface.BlazeFaceModel;
-
-
     const classes = useStyles();
-
-    
 
     const [deviceReady, setDeviceReady] = useState<boolean>(false);
     const [userVideos, setUserVideos] = useState<Array<userVideo>>([]);
 
-   
-    const { user } = useSelector((state: any) => state.authentication)
+    const { loggingIn, user } = useSelector((state: any) => state.authentication)
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {  
+        if(loggingIn == undefined)
+            dispatch(checkLogin());
+    },[]);
+    
 
 
     useEffect(() => {
+        if(loggingIn!=true){
+            return;
+        }
+
         async function initalizeSocket() {
             const url = props.match.params.roomId;
-            socketConnect = new SocketConnect(url);
+            socketConnect = new SocketConnect(url, user);
  
             await socketConnect.connectSocket()
                 .catch((error) => {
@@ -100,7 +99,7 @@ const Room1 = (props: app) => {
         }
 
         initalizeSocket();
-    },[]);
+    },[loggingIn]);
 
     useEffect(() => {
         if (deviceReady) {
@@ -121,10 +120,13 @@ const Room1 = (props: app) => {
         return () => {
             clearInterval(updateVideo);
         }
-    },[])
+    },[]);
+
+    
 
 
     const backClick = () => {
+        socketConnect.socket.close();
         props.history.push('/');
     }
 
@@ -136,41 +138,46 @@ const Room1 = (props: app) => {
         return (
             <div key={index}>
             <Grid item>
-                <Video
-                    stream={videoinfo.stream}
+                <UserVideo
+                    userVideo={videoinfo}
                 />
             </Grid>
             </div>
         )
     }
 
-    return(
-        <div>
-            <div className='header_bar'>
-                <Button variant="contained" size="small" color='primary' onClick={()=>backClick()}>Back</Button>
-            </div>
-            <div className='total_zone'>
-                
+    if(loggingIn)
+        return(
+            <div>
+                <div className='header_bar'>
+                    <Button variant="contained" size="small" color='primary' onClick={()=>backClick()}>Back</Button>
+                </div>
+                <div className='total_zone'>
+                    
 
 
-                <MyVideo localVideoRef={localVideoRef}/>
+                    <MyVideo localVideoRef={localVideoRef}/>
 
-                <div className='user_zone'>
-                    <div className='user_vidoes'>
-                        <Grid container  className={classes.container}>
-                            
-                            {userVideos.map((videoinfo, index) => {
-                                return uservideoget(videoinfo, index);
-                            })
-                            }
-                            
-                            
-                        </Grid>
+                    <div className='user_zone'>
+                        <div className='user_vidoes'>
+                            <Grid container  className={classes.container}>
+                                
+                                {userVideos.map((videoinfo, index) => {
+                                    return uservideoget(videoinfo, index);
+                                })
+                                }
+                                
+                                
+                            </Grid>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    )
+        )
+    else
+        return(
+            <div>기달려주세용!</div>
+        )
 }
 
 export default Room1

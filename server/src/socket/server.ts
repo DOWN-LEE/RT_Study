@@ -9,7 +9,7 @@ import { Room } from './room/room';
 import { cleanUpPeer, createConsumer, createTransport, addConsumer, addConsumerTransport,
 addProducer, addProducerTrasport, getConsumer, getConsumerTransport, getOtherProducers,
 getProducer, getProducerTrasnport, removeConsumer, removeConsumerSetDeep,removeProducer,
-removeConsumerTransport, removeProducerTransport } from './request/requests';
+removeConsumerTransport, removeProducerTransport, getOhterMembers } from './request/requests';
 
 
 export function run(app: express.Application){
@@ -77,8 +77,8 @@ export function run(app: express.Application){
                 callback(null, { text: '[prepare_room] empty!', type:'empty'});
                 return;
             }
-                
-            if (existRoom.limitMembers <= existRoom.Members.size) {
+            
+            if (existRoom.limitMembers <= Object.keys(existRoom.Members).length) {
                 callback(null, { text: '[prepare_room] exceed!', type: 'exceed' });
                 return;
             }
@@ -88,7 +88,7 @@ export function run(app: express.Application){
             // --- socket.io room ---
             socket.join(roomId);
             setRoomname(roomId);
-            existRoom.addMember(userName, socket.id);
+            existRoom.addMember(socket.id, userName);
 
             callback({}, null);
         });
@@ -162,7 +162,12 @@ export function run(app: express.Application){
 
             // inform clients about new producer
             console.log('--broadcast newProducer ---');
-            socket.broadcast.to(roomname).emit('newProducer', { socketId: id, producerId: producer.id, kind: producer.kind });
+            socket.broadcast.to(roomname).emit('newProducer', { 
+                socketId: id, 
+                producerId: producer.id, 
+                kind: producer.kind, 
+                userName: socket.userName 
+            });
         });
 
 
@@ -199,8 +204,10 @@ export function run(app: express.Application){
             const clientId = data.localId;
             const otherProducersVideoIds = getOtherProducers(roomname, clientId, 'video');
             const otherProducersAudioIds = getOtherProducers(roomname, clientId, 'audio');
+            const ohterMembers = getOhterMembers(roomname);
+            
 
-            callback({ VideoIds: otherProducersVideoIds, AudioIds: otherProducersAudioIds }, null);
+            callback({ VideoIds: otherProducersVideoIds, AudioIds: otherProducersAudioIds, Members: ohterMembers }, null);
         });
 
         socket.on('consumeAdd', async (data: any, callback: any) => {
@@ -265,6 +272,9 @@ export function run(app: express.Application){
             if(!producer.paused){
                 producer.pause();
             }
+            socket.broadcast.to(roomname).emit('producerVideoOff', { 
+                producerId: socket.id
+            });
         });
 
         socket.on('myVideoOn', (data: any, callback: any) => {
@@ -273,6 +283,9 @@ export function run(app: express.Application){
             if(producer.paused){
                 producer.resume();
             }
+            socket.broadcast.to(roomname).emit('producerVideoOn', { 
+                producerId: socket.id
+            });
         });
 
         socket.on('myAudioOff', (data: any, callback: any) => {
@@ -281,6 +294,9 @@ export function run(app: express.Application){
             if(!producer.paused){
                 producer.pause();
             }
+            socket.broadcast.to(roomname).emit('producerAudioOff', { 
+                producerId: socket.id
+            });
         });
 
         socket.on('myAudioOn', (data: any, callback: any) => {
@@ -289,6 +305,9 @@ export function run(app: express.Application){
             if(producer.paused){
                 producer.resume();
             }
+            socket.broadcast.to(roomname).emit('producerAudioOn', { 
+                producerId: socket.id
+            });
         });
 
 

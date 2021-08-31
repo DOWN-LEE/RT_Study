@@ -10,14 +10,15 @@ export class SocketConnect {
     public socketId: string = '';
     public roomUrl: string;
     public subscribe!: Subsribe;
+    public user: any;
 
-    constructor(url: string) {
+    constructor(url: string, user:any) {
         const serverUrl = `http://${hostname}:${hostport}`;
         const opts = {
             path: '/server',
             transports: ['websocket'],
         };
-
+        this.user = user;
         this.socket = io(serverUrl, opts);
         this.roomUrl = url;
     }
@@ -45,7 +46,7 @@ export class SocketConnect {
 
             this.socket.on('socketConnection-finish', async (message: { type: string, id: any }) => {      
                 
-                await this.sendRequest('prepare_room', {roomId: this.roomUrl})
+                await this.sendRequest('prepare_room', {roomId: this.roomUrl, userName: this.user.name})
                     .then(()=>{
                         console.log('prepare room : ', this.roomUrl);
                     });
@@ -70,13 +71,14 @@ export class SocketConnect {
                 const remoteId = message.socketId;
                 const prdId = message.producerId;
                 const kind = message.kind;
+                const userName =message.userName;
                 if (kind === 'video') {
                     console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
-                    this.subscribe.consumeAdd(this.subscribe.consumerTransport, remoteId, prdId, kind);
+                    this.subscribe.consumeAdd(this.subscribe.consumerTransport, remoteId, userName, kind);
                 }
                 else if (kind === 'audio') {
                     console.log('--try consumeAdd remoteId=' + remoteId + ', prdId=' + prdId + ', kind=' + kind);
-                    this.subscribe.consumeAdd(this.subscribe.consumerTransport, remoteId, prdId, kind);
+                    this.subscribe.consumeAdd(this.subscribe.consumerTransport, remoteId, userName, kind);
                 }
             });
 
@@ -89,6 +91,50 @@ export class SocketConnect {
                 this.subscribe.removeConsumer(producereId, kind);
                 this.subscribe.removeRemoteVideo(producereId);
             })
+
+            this.socket.on('producerAudioOff', (message: any) => {
+                const producerId = message.producerId;
+                
+                this.subscribe.userVideos = this.subscribe.userVideos.map((uv) => {
+                    if(uv.producerId == producerId){
+                        uv.muted = true;
+                    }
+                    return uv;
+                });
+            });
+
+            this.socket.on('producerAudioOn', (message: any) => {
+                const producerId = message.producerId;
+                
+                this.subscribe.userVideos = this.subscribe.userVideos.map((uv) => {
+                    if(uv.producerId == producerId){
+                        uv.muted = false;
+                    }
+                    return uv;
+                });
+            });
+
+            this.socket.on('producerVideoOff', (message: any) => {
+                const producerId = message.producerId;
+                
+                this.subscribe.userVideos = this.subscribe.userVideos.map((uv) => {
+                    if(uv.producerId == producerId){
+                        uv.videoOn = false;
+                    }
+                    return uv;
+                });
+            });
+
+            this.socket.on('producerVideoOn', (message: any) => {
+                const producerId = message.producerId;
+                
+                this.subscribe.userVideos = this.subscribe.userVideos.map((uv) => {
+                    if(uv.producerId == producerId){
+                        uv.videoOn = true;
+                    }
+                    return uv;
+                });
+            });
 
         })
     }

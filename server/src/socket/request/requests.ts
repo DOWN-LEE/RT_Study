@@ -147,9 +147,9 @@ export function removeConsumer(roomname: any, localId: any, producereId: any, ki
     room.removeConsumer(localId, producereId, kind);
 }
 
-export function removeMember(roomname: string, memberName: string) {
+export function removeMember(roomname: string, socketid: string) {
     const room = Room.getRoom(roomname);
-    room.removeMember(memberName);
+    room.removeMember(socketid);
 }
 
 
@@ -181,15 +181,19 @@ export function cleanUpPeer(roomname: any, socket: any) {
       removeProducerTransport(roomname, id);
     }
 
-    removeMember(roomname, socket.userName);
+    removeMember(roomname, id);
 }
 
-export function removeConsumerSetDeep(roomname: any, localId: any) {
+export function removeConsumerSetDeep(roomname: string, localId: string) {
     const room = Room.getRoom(roomname);
     room.removeConsumerSetDeep(localId);
 }
 
 
+export function getOhterMembers(roomname: string) {
+    const room = Room.getRoom(roomname);
+    return room.Members;
+}
 
 
 

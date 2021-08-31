@@ -66,28 +66,30 @@ export class Subsribe {
             });
         const videoIds = otherProducers.VideoIds;
         const audioIds = otherProducers.AudioIds;
+        const Members = otherProducers.Members;
+        console.log("################", Members);
         console.log('otherProducers', otherProducers);
 
         videoIds.forEach((vid: any) => {
-            this.consumeAdd(this.consumerTransport, vid, null, 'video');
+            this.consumeAdd(this.consumerTransport, vid, Members[vid], 'video');
         });
 
         audioIds.forEach((aid: any) => {
-            this.consumeAdd(this.consumerTransport, aid, null, 'audio');
+            this.consumeAdd(this.consumerTransport, aid, Members[aid], 'audio');
         });
     };
 
 
-    async consumeAdd(consumerTransport: mediaSoupTypes.Transport, producerSocketId: any, prdId: any, tkind: string) {
+    async consumeAdd(consumerTransport: mediaSoupTypes.Transport, producerSocketId: any, userName: any, tkind: string) {
         const { rtpCapabilities } = this.device;
         const data = await this.socketConnect.sendRequest('consumeAdd', { rtpCapabilities: rtpCapabilities, producereId: producerSocketId, kind: tkind })
             .catch((err: any) => {
                 console.log('consumeAdd error', err);
             });
 
-        if (prdId && (prdId !== producerSocketId)) {
-            console.warn('producerID NOT MATCH');
-        }
+        // if (prdId && (prdId !== producerSocketId)) {
+        //     console.warn('producerID NOT MATCH');
+        // }
 
         const id = data.id;
         const producerId = data.producerId;
@@ -102,7 +104,7 @@ export class Subsribe {
             rtpParameters,
         });
         // TODO VIDEO
-        this.addSubVideo(producerSocketId, consumer.track, kind);
+        this.addSubVideo(producerSocketId, consumer.track, kind, userName);
         this.addConsumer(producerSocketId, consumer, kind);
 
         consumer.on("producerclose", () => {
@@ -142,7 +144,7 @@ export class Subsribe {
         }
     }
 
-    async addSubVideo(producerSocketId: any, track: any, kind: any) {
+    async addSubVideo(producerSocketId: any, track: any, kind: any, userName: string) {
         
         let isExist = 0;
         
@@ -160,8 +162,10 @@ export class Subsribe {
             newMedia.addTrack(track);
             this.userVideos = [...this.userVideos, {
                 producerId: producerSocketId,
-                userName: "",
-                stream: newMedia
+                userName: userName,
+                stream: newMedia,
+                muted: true,
+                videoOn: true,
             }]
         }
         

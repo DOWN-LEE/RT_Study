@@ -10,7 +10,6 @@ let device: mediaSoupTypes.Device;
 let videoProducer: mediaSoupTypes.Producer;
 let audioProducer: mediaSoupTypes.Producer;
 
-
 export async function VideoOn(publishData: publishDataType) {
     socket = publishData.socket;
     localStream = publishData.localStream;
@@ -51,7 +50,7 @@ export async function VideoOn(publishData: publishDataType) {
             errback(err);
         }
     });
-
+    
     producerTransport.on('connectionstatechange', (state) => {
         switch (state) {
             case 'connecting':
@@ -78,7 +77,7 @@ export async function VideoOn(publishData: publishDataType) {
         const trackParams = { track: videoTrack };
         videoProducer = await producerTransport.produce(trackParams);
     }
-
+    
 
     const audioTrack = localStream.getAudioTracks()[0];
     if (audioTrack) {

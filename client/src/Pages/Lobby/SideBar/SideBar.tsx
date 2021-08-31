@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { TextField, Button, withStyles, makeStyles, createStyles,  Modal, Backdrop, Fade, Theme, Paper, Grid, Typography  } from '@material-ui/core';
+import { TextField, Button, withStyles, makeStyles, createStyles,  Modal, Backdrop, Fade, Theme, Paper, Grid, Typography,
+TableContainer, Table, TableHead ,TableCell, TableRow, TableBody } from '@material-ui/core';
 import { api } from '../../../api/axios';
 import qs from 'qs';
+import { rankUser } from  './@type/index';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -42,8 +44,12 @@ const useStyles = makeStyles((theme: Theme) =>
           margin: 'auto',
           maxWidth: 500,
       },
+      table: {
+        minWidth: 20,
+      },
   }),
 );
+
 
 
 const SideBar = () => {
@@ -54,6 +60,7 @@ const SideBar = () => {
     const [validId, setValidId] = useState<boolean>(false);
     const [validPassword, setValidPassword] = useState<boolean>(false);
     const [invalidId, setInvalidId] = useState<boolean>(false);
+    const [rank, setRank] = useState<rankUser[]>([]);
     
 
     const { loggingIn, user } = useSelector((state: any) => state.authentication)
@@ -64,6 +71,40 @@ const SideBar = () => {
     useEffect(() => {  
         if(loggingIn == undefined)
             dispatch(checkLogin());
+        
+        api.get('/time/rank/')
+            .then((response) => {
+                const result = response.data.data.rank;
+                let newRank = [];
+                for (const r of result) {
+                    newRank.push({
+                        name: r[0],
+                        time: r[1]
+                    })
+                };
+                setRank(newRank);
+            });
+    }, []);
+
+    useEffect(() => {
+        const updateRank = setInterval(() => {
+            api.get('/time/rank/')
+                .then((response) => {
+                    const result = response.data.data.rank;
+                    let newRank = [];
+                    for(const r of result){
+                        newRank.push({
+                            name: r[0],
+                            time: r[1]
+                        })
+                    };
+                    setRank(newRank);
+                });
+        }, 2000);
+
+        return () => {
+            clearInterval(updateRank);
+        }
     },[]);
 
    
@@ -187,6 +228,16 @@ const SideBar = () => {
     }
 
 
+    const formatTime = (itime: string) => {
+        const time = Number(itime);
+        const getSeconds: any = `0${(time % 60)}`.slice(-2)
+        const minutes: any = `${Math.floor(time / 60)}`
+        const getMinutes = `0${minutes % 60}`.slice(-2)
+        const getHours = `0${Math.floor(time / 3600)}`.slice(-2)
+    
+        return `${getHours} : ${getMinutes} : ${getSeconds}`
+    }
+
 
     return (
 
@@ -196,6 +247,33 @@ const SideBar = () => {
             </div>
 
             {userInfo()}
+
+            <div className='rankBox'>
+                오늘의 공부왕
+                <TableContainer component={Paper}>
+                    <Table className={classes.table}>
+                        <TableHead>
+                            <TableRow>
+                                {/* <TableCell>Rank</TableCell> */}
+                                <TableCell align="left">Name</TableCell>
+                                <TableCell align="center">RT_Time</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rank.map((r, index) => (
+                                <TableRow key={index}>
+                                    {/* <TableCell component="th" scope="row">
+                                        {index+1}
+                                    </TableCell> */}
+                                    <TableCell align="left">{r.name}</TableCell>
+                                    <TableCell align="center">{formatTime(r.time)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </div>
+
 
         </div>
 

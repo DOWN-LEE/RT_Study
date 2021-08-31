@@ -17,7 +17,9 @@ export interface publishDataType{
 export interface userVideo {
     userName: string,
     producerId: string,
-    stream: MediaStream
+    stream: MediaStream,
+    muted: boolean,
+    videoOn: boolean
 }
 
 export interface app {

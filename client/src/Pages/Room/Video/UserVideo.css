@@ -1,0 +1,50 @@
+.user_face{
+    width: 15vw;
+    height: 26vh;
+    
+}
+
+.user_video{
+    background-color: black;
+    height: 100%;
+    width: 100%;
+    border: 1px solid black;
+    
+}
+
+.user_photo{
+    background-color: black;
+    width: 101%;
+    height: 100%;
+    position: relative;
+    top: -27vh
+}
+
+.user_video_info{
+    height: 3.5vh;
+    overflow:visible;
+    position: relative;
+    top : -4vh;
+}
+
+
+.user_video_name{
+    padding-left: 0.4vw;
+    padding-right: 0.4vw;
+    
+    display: inline-block;
+    background-color: black;
+    opacity: 0.5;
+    height: 3.5vh;
+    color:aliceblue;
+
+
+}
+
+.user_video_muted{
+    opacity: 1 !important;
+    color: #940606;
+    height: 10%;
+    
+   
+}

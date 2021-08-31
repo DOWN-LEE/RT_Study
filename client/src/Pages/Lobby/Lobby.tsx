@@ -142,9 +142,7 @@ const Lobby = (props: app) => {
             .catch((error) => {
                 console.log(error);
             })
-
-
-    }
+    };
 
 
 

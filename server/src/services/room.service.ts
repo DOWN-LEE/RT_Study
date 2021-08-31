@@ -19,7 +19,7 @@ class RoomService {
             
             for(const room of Room.rooms.values()) {
                 if(roomName == room.name){
-                    if(room.limitMembers <= room.Members.size){
+                    if(room.limitMembers <= Object.keys(room.Members).length){
                         throw new HttpException(403, 'exceed!');
                     }
                     return {type : 'OK', url : room.url };
@@ -27,10 +27,10 @@ class RoomService {
             }
 
             
-            new HttpException(404, 'error');
+            throw new HttpException(404, 'error');
             
         } catch (error) {
-            new HttpException(404, 'error');
+            throw new HttpException(404, 'error');
         }
     }
 
@@ -74,7 +74,7 @@ class RoomService {
             result.push({
                 name: room.name,
                 limitMembers: room.limitMembers,
-                currentMembers: room.Members.size,
+                currentMembers: Object.keys(room.Members).length,
 
             })
         }

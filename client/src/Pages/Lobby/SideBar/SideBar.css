@@ -23,3 +23,11 @@
 #loginButton{
     height: 35px;
 }
+
+.rankBox{
+    margin-top: 10vh;
+    font-size: 22px;
+    font-weight: 600;
+    color:white;
+    text-align: center; 
+}

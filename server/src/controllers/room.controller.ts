@@ -2,13 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import { CreateRoomDto } from '../dtos/createRoom.dto';
 import { JoinRoomDto } from '../dtos/joinRoom.dto';
 import { User } from '../interfaces/users.interface';
-import AuthService from '../services/auth.service';
+
 import RoomService from '../services/room.service';
 import { RedisClient } from 'redis';
 import { RequestWithUser } from 'interfaces/auth.interface';
 
 class RoomController {
-    public authService = new AuthService();
+  
     public roomService = new RoomService();
 
 

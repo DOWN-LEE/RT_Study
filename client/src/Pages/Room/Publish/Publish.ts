@@ -8,7 +8,7 @@ export class Publish {
     public producerTransport!: mediaSoupTypes.Transport;
     public localVideoRef: React.RefObject<HTMLVideoElement>;
     public socketConnect: SocketConnect;
-    public localStream: any;
+    public localStream!: MediaStream;
 
     constructor(device: Device, socketConnect: SocketConnect, localVideoRef: React.RefObject<HTMLVideoElement>) {
         this.device = device;
@@ -29,7 +29,7 @@ export class Publish {
 
                 // TODO PUBLISH 끝내기
             });
-
+    
         console.log('--- createProducerTransport --');
         const params = await this.socketConnect.sendRequest('createProducerTransport', {});
         this.producerTransport = this.device.createSendTransport(params);
