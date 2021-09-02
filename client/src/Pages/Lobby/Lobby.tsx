@@ -80,7 +80,9 @@ const Lobby = (props: app) => {
 
     useEffect(() => {
         if(refreshTimer > 0){
-            setTimeout(() => setRefreshTimer(refreshTimer-1), 1000);
+            const timer = setTimeout(() => setRefreshTimer(refreshTimer-1), 1000);
+
+            return () => { clearTimeout(timer); }
         }
     }, [refreshTimer]);
 

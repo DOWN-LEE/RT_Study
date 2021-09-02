@@ -82,6 +82,8 @@ const MyVideo = (props: any) => {
 
         }
         initTM();
+
+        return () => { clearInterval(faceCheck.current); }
     }, []);
 
     useEffect(()=>{
@@ -96,6 +98,8 @@ const MyVideo = (props: any) => {
             studyTimer.current = setInterval(() => {
                 setStudyTime((timer) => timer + 1)
             }, 1000);
+            
+            return () => { clearInterval(studyTimer.current); }
         }
 
     }, [isFace, myVideoOn]);
