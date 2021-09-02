@@ -18,7 +18,9 @@ class RoomController {
             //const redisClient: RedisClient = req.app.get('redisClient');
             const joinResult= await this.roomService.join(joinData);
 
-            
+            if(joinResult.type == 'exceed'){
+                res.status(403).json({ message: 'exceed'});
+            }
             
             res.status(200).json({ data: joinResult.url, message: 'url'});
             

@@ -19,7 +19,7 @@ export class Publish {
 
     async publish(videoOn: boolean, micOn: boolean) {
 
-        await navigator.mediaDevices.getUserMedia({ video: videoOn, audio: micOn }) //TODO
+        await navigator.mediaDevices.getUserMedia({ video: videoOn, audio: micOn }) 
             .then((stream: any) => {
                 this.localStream = stream;
                 this.playVideo(this.localVideoRef, this.localStream);

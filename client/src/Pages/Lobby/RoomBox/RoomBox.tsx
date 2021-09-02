@@ -29,7 +29,8 @@ interface box {
     currentMembers: number,
     limitMembers: number,
     history: History,
-    setCreateWrong:any
+    setCreateWrong: any,
+    errorModal: any,
 }
 
 const RoomBox = (props: box) => {
@@ -52,11 +53,11 @@ const RoomBox = (props: box) => {
                 } 
             })
             .catch((error) => {
-                if(error.status == 403){
-                    //exceed
+                if(error.response.status == 403){
+                    props.errorModal('인원이 초과했습니다.')
                 }
-                else if(error.status == 404){
-                    //error
+                else if(error.response.status == 404){
+                    props.errorModal('유효하지 방입니다.')
                 }
             });
 

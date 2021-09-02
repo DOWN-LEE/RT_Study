@@ -57,6 +57,7 @@ interface app {
 const Lobby = (props: app) => {
 
     const [createWrong, setCreateWrong] = useState<boolean>(false);
+    const [wrongMesg, setWrongMesg] = useState<string>('');
     const [rooms, setRooms] = useState<Array<box>>([]);
     const [refreshTimer, setRefreshTimer] = useState<number>(0);
     const [createModel, setCreateModel] = useState<boolean>(false);
@@ -116,7 +117,7 @@ const Lobby = (props: app) => {
 
     const createClick = () => {
         if (loggingIn != true) {
-            setCreateWrong(true);
+            errorModal('로그인을 해주세요.')
             return;
         }
 
@@ -140,9 +141,14 @@ const Lobby = (props: app) => {
                 console.log(response)
             })
             .catch((error) => {
-                console.log(error);
+                console.log("error");
             })
     };
+
+    const errorModal = (mesg: string) => {
+        setWrongMesg(mesg);
+        setCreateWrong(true);
+    }
 
 
 
@@ -163,8 +169,6 @@ const Lobby = (props: app) => {
                         <Button variant="contained" color="primary" onClick={() => createClick()}>  Create! </Button>
 
                         <Modal
-                            aria-labelledby="transition-modal-title"
-                            aria-describedby="transition-modal-description"
                             open={createWrong}
                             onClose={() => { setCreateWrong(false) }}
                             closeAfterTransition
@@ -176,8 +180,8 @@ const Lobby = (props: app) => {
                         >
                             <Fade in={createWrong}>
                                 <div className={classes.pad}>
-                                    <h2 id="transition-modal-title">Wrong!</h2>
-                                    <p id="transition-modal-description">로그인을 해주세요.</p>
+                                    <h2>Wrong!</h2>
+                                    <p>{wrongMesg}</p>
                                 </div>
                             </Fade>
                         </Modal>
@@ -234,6 +238,7 @@ const Lobby = (props: app) => {
                         limitMembers={room.limitMembers}
                         history={props.history}
                         setCreateWrong={setCreateWrong}
+                        errorModal={errorModal}
                         key={i} />)}
 
                 </Grid>

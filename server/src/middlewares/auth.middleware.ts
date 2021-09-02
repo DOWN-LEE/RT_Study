@@ -25,7 +25,8 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
             next(new HttpException(404, 'Authentication token missing'));
         }
     } catch (error) {
-        next(new HttpException(401, error))
+        // next(new HttpException(401, error))
+        res.status(404).json({ message: 'not-loggin' });
     }
 }
 

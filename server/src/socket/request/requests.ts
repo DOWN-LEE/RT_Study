@@ -37,6 +37,7 @@ export async function createTransport(roomname: string){
 
 export function getProducerTrasnport(roomname: string, id: any) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     return room.getProducerTrasnport(id);
 }
 
@@ -53,27 +54,32 @@ export function addProducerTrasport(roomname: string, id: any, transport: mediaS
 
 export function removeProducerTransport(roomname: string, id: any) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.removeProducerTransport(id);
 }
 
 
 export function removeProducer(roomname: string, id: any, kind: any) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.removeProducer(id, kind);
 }
 
 export function getOtherProducers(roomname: string, clientId: any, kind: any) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     return room.getRemoteIds(clientId, kind);
 }
 
 export function getProducer(roomname: string, id: any, kind: any) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     return room.getProducer(id, kind);
 }
 
 export function addProducer(roomname: string, id: any, producer: any, kind: any) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.addProducer(id, producer, kind);
 }
 
@@ -82,22 +88,26 @@ export function addProducer(roomname: string, id: any, producer: any, kind: any)
 
 export function getConsumerTransport(roomname: string, id: any): mediaSoupTypes.WebRtcTransport{
     const room = Room.getRoom(roomname);
+    if(!room) return;
     return room.getConsumerTrasnport(id);
 }
 
 export function addConsumerTransport(roomname: string, id: any, transport: mediaSoupTypes.WebRtcTransport){
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.addConsumerTrasport(id, transport);
 }
 
 export function removeConsumerTransport(roomname: any, id: any){
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.removeConsumerTransport(id);
 }
 
 
 export function getConsumer(roomname: any, localId: any, remoteId: any, kind: string) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     return room.getConsumer(localId, remoteId, kind);
 }
 
@@ -105,6 +115,7 @@ export function getConsumer(roomname: any, localId: any, remoteId: any, kind: st
 
 export async function createConsumer(roomname: any, transport: mediaSoupTypes.WebRtcTransport, producer: any, rtpCapabilities: any) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     const router: any = room.router;
     
     if(!router.canConsume({
@@ -139,19 +150,29 @@ export async function createConsumer(roomname: any, transport: mediaSoupTypes.We
 
 export function addConsumer(roomname: any, localId: any, producerId: any, consumer: mediaSoupTypes.Consumer, kind: string){
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.addConsumer(localId, producerId, consumer, kind);
 }
 
 export function removeConsumer(roomname: any, localId: any, producereId: any, kind: string) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.removeConsumer(localId, producereId, kind);
 }
 
 export function removeMember(roomname: string, socketid: string) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.removeMember(socketid);
 }
 
+function checkEmpty(roomname: string){
+    const room = Room.getRoom(roomname);
+    if(!room) return;
+    if(Object.keys(room.Members).length == 0){
+        Room.removeRoom(roomname);
+    }
+}
 
 export function cleanUpPeer(roomname: any, socket: any) {
     const id = socket.id;
@@ -182,10 +203,13 @@ export function cleanUpPeer(roomname: any, socket: any) {
     }
 
     removeMember(roomname, id);
+
+    checkEmpty(roomname);
 }
 
 export function removeConsumerSetDeep(roomname: string, localId: string) {
     const room = Room.getRoom(roomname);
+    if(!room) return;
     room.removeConsumerSetDeep(localId);
 }
 

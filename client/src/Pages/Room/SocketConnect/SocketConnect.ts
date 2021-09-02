@@ -31,9 +31,9 @@ export class SocketConnect {
         return new Promise((resolve, reject) => {
            
             this.socket.on('connect', () => {
-                //sendRequest('userEmail', {email: user.email})
+                this.sendRequest('userEmail', {email: this.user.email})
 
-            })
+            });
 
             this.socket.on('error', (err: any) => {
                 console.error('socket.io ERROR:', err);
@@ -44,12 +44,29 @@ export class SocketConnect {
                 console.log('socket.io disconnect:', evt);
             });
 
+            // this.socket.on('newConnection', () => {
+            //     this.socket.close();
+            //     reject('새로운 접속이 확인됐습니다.')
+            // });
+
             this.socket.on('socketConnection-finish', async (message: { type: string, id: any }) => {      
                 
+                
                 await this.sendRequest('prepare_room', {roomId: this.roomUrl, userName: this.user.name})
-                    .then(()=>{
+                    .then(() => {
                         console.log('prepare room : ', this.roomUrl);
+                    })
+                    .catch((error: any) => {
+                        if(error.type == 'exceed'){
+                            this.socket.close();
+                            reject('인원수가 초과한 방입니다!')
+                        }
+                        if(error.type == 'empty'){
+                            this.socket.close();
+                            reject('존재하지 않는 방입니다!')
+                        }
                     });
+
                 
                 console.log('socketConnection-finish', message);
                 if (message.type === 'finish') {

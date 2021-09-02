@@ -43,34 +43,39 @@ const MyVideo = (props: any) => {
 
     useEffect(() => {
         const initTM = async () => {
+            
             await tf.setBackend('webgl');
             facemodel = await blazeface.load();
 
             faceCheck.current = setInterval(async () => {
-            
-                if (!props.localVideoRef.current) {
-                    return;
-                }
-                
-                const totalArea = props.localVideoRef.current.videoWidth * props.localVideoRef.current.videoHeight;
-                const preds = await facemodel.estimateFaces(props.localVideoRef.current, false);
-    
-                let facechecker = false;
-                
-                for (let i = 0; i < preds.length; i++) {
-                    let p: any = preds[i];
+                try {
+                    if (!props.localVideoRef.current) {
+                        return;
+                    }
 
-                    const faceArea = (p.bottomRight[0] - p.topLeft[0]) * (p.bottomRight[1] - p.topLeft[1]);
-                    console.log(faceArea, totalArea);
-                    if(faceArea * 25 > totalArea){
-                        setIsFace(true);
-                        facechecker = true;
-                        break;
-                    } 
+                    const totalArea = props.localVideoRef.current.videoWidth * props.localVideoRef.current.videoHeight;
+                    const preds = await facemodel.estimateFaces(props.localVideoRef.current, false);
+
+                    let facechecker = false;
+
+                    for (let i = 0; i < preds.length; i++) {
+                        let p: any = preds[i];
+
+                        const faceArea = (p.bottomRight[0] - p.topLeft[0]) * (p.bottomRight[1] - p.topLeft[1]);
+                        console.log(faceArea, totalArea);
+                        if (faceArea * 25 > totalArea) {
+                            setIsFace(true);
+                            facechecker = true;
+                            break;
+                        }
+                    }
+
+                    if (facechecker == false) {
+                        setIsFace(false);
+                    }
                 }
-                
-                if(facechecker==false){
-                    setIsFace(false);
+                catch (error: any) {
+
                 }
                 
             }, 1500);

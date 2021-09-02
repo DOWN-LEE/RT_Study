@@ -20,7 +20,7 @@ class RoomService {
             for(const room of Room.rooms.values()) {
                 if(roomName == room.name){
                     if(room.limitMembers <= Object.keys(room.Members).length){
-                        throw new HttpException(403, 'exceed!');
+                        return {type : 'exceed'};
                     }
                     return {type : 'OK', url : room.url };
                 }
@@ -30,7 +30,7 @@ class RoomService {
             throw new HttpException(404, 'error');
             
         } catch (error) {
-            throw new HttpException(404, 'error');
+            throw error;
         }
     }
 

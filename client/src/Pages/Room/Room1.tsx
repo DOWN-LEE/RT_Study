@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, makeStyles, createStyles, Theme, Grid } from '@material-ui/core';
+import { Button, makeStyles, createStyles, Theme, Grid, Modal, Fade, Backdrop } from '@material-ui/core';
 
 
 import { Device, types as mediaSoupTypes } from 'mediasoup-client';
@@ -34,7 +34,18 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       container: {
           height: '82vh'
-      }
+      },
+      modal: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    pad: {
+        backgroundColor: theme.palette.background.paper,
+        border: '2px solid #000',
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing(2, 4, 3),
+    },
   }),
 );
 
@@ -53,7 +64,10 @@ const Room1 = (props: app) => {
     const classes = useStyles();
 
     const [deviceReady, setDeviceReady] = useState<boolean>(false);
+    const [subReady, setSubReady] = useState<boolean>(false);
     const [userVideos, setUserVideos] = useState<Array<userVideo>>([]);
+    const [wrongModal, setWrongModal] = useState<boolean>(false);
+    const [modalMesg, setModalMesg] = useState<string>('');
 
     const { loggingIn, user } = useSelector((state: any) => state.authentication)
 
@@ -72,30 +86,39 @@ const Room1 = (props: app) => {
         }
 
         async function initalizeSocket() {
-            const url = props.match.params.roomId;
-            socketConnect = new SocketConnect(url, user);
- 
-            await socketConnect.connectSocket()
-                .catch((error) => {
-                    console.log(error);
-                    return;
-                });
-
-            const routerRtpCapabilities: mediaSoupTypes.RtpCapabilities = await socketConnect.sendRequest('getRouterRtpCapabilities', {})
-                .catch((err: any) => {
-                    console.log("[error]: ", err);
-                });
-
             try {
-                device = new Device();
-            } catch (error: any) {
-                if (error.name === 'UnsupportedError') {
-                    console.error('browser not supported');
-                }
-            }
-            await device.load({ routerRtpCapabilities });
+                const url = props.match.params.roomId;
+                socketConnect = new SocketConnect(url, user);
 
-            setDeviceReady(true);
+                await socketConnect.connectSocket()
+                    .catch((error) => {
+                        throw(error);
+                    });
+
+                const routerRtpCapabilities: mediaSoupTypes.RtpCapabilities = await socketConnect.sendRequest('getRouterRtpCapabilities', { })
+                    .catch((err: any) => {
+                        console.log("[error]: ", err);
+                    });
+
+                try {
+                    device = new Device();
+                } catch (error: any) {
+                    if (error.name === 'UnsupportedError') {
+                        console.error('browser not supported');
+                    }
+                }
+                await device.load({ routerRtpCapabilities });
+
+                setDeviceReady(true);
+
+                socketConnect.socket.on('newConnection', () => {
+                    socketConnect.socket.close();
+                    errorModal("새로운 접속이 감지됐습니다.")
+                });
+            }
+            catch (error: any) {
+                errorModal(error);
+            }
         }
 
         initalizeSocket();
@@ -106,6 +129,7 @@ const Room1 = (props: app) => {
             subsribe = new Subsribe(device, socketConnect);
             socketConnect.setSubscribe(subsribe);
             subsribe.subscribe();
+            setSubReady(true);
 
             publish = new Publish(device, socketConnect, localVideoRef);
             publish.publish(true, true);
@@ -113,14 +137,17 @@ const Room1 = (props: app) => {
     },[deviceReady])
 
     useEffect(() => {
-        const updateVideo = setInterval(() => {
-            setUserVideos(subsribe.userVideos);
-        }, 1000);
+        if (subReady) {
+            const updateVideo = setInterval(() => {
+                setUserVideos(subsribe.userVideos);
+            }, 1000);
 
-        return () => {
-            clearInterval(updateVideo);
+            return () => {
+                clearInterval(updateVideo);
+            }
         }
-    },[]);
+
+    }, [subReady]);
 
     
 
@@ -131,9 +158,6 @@ const Room1 = (props: app) => {
     }
 
     
-
-
-
     const uservideoget = (videoinfo: userVideo, index: number) => {
         return (
             <div key={index}>
@@ -144,6 +168,11 @@ const Room1 = (props: app) => {
             </Grid>
             </div>
         )
+    }
+
+    const errorModal = (message: string) => {
+        setModalMesg(message);
+        setWrongModal(true);
     }
 
     if(loggingIn)
@@ -172,6 +201,24 @@ const Room1 = (props: app) => {
                         </div>
                     </div>
                 </div>
+
+                <Modal
+                    open={wrongModal}
+                    onClose={() => { setWrongModal(false); props.history.push('/'); }}
+                    closeAfterTransition
+                    className={classes.modal}
+                    BackdropComponent={Backdrop}
+                    BackdropProps={{
+                        timeout: 500,
+                    }}
+                >
+                    <Fade in={wrongModal}>
+                        <div className={classes.pad}>
+                            <h2>Wrong!</h2>
+                            <p>{modalMesg}</p>
+                        </div>
+                    </Fade>
+                </Modal>
             </div>
         )
     else

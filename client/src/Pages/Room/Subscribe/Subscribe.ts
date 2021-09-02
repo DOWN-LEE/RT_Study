@@ -103,7 +103,7 @@ export class Subsribe {
             kind,
             rtpParameters,
         });
-        // TODO VIDEO
+       
         this.addSubVideo(producerSocketId, consumer.track, kind, userName);
         this.addConsumer(producerSocketId, consumer, kind);
 
