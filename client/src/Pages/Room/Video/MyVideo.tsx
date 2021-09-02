@@ -62,7 +62,7 @@ const MyVideo = (props: any) => {
                         let p: any = preds[i];
 
                         const faceArea = (p.bottomRight[0] - p.topLeft[0]) * (p.bottomRight[1] - p.topLeft[1]);
-                        console.log(faceArea, totalArea);
+                       
                         if (faceArea * 25 > totalArea) {
                             setIsFace(true);
                             facechecker = true;
@@ -164,7 +164,7 @@ const MyVideo = (props: any) => {
                 <img 
                     style={{visibility: myVideoOn? 'hidden' : 'visible'}}
                     className='my_photo'
-                    src='/img/person.jpg'
+                    src='/img/black.png'
                 />
             </div>
 

@@ -4,12 +4,9 @@ import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { Routes } from './interfaces/routes.interface';
 import { connect, set } from 'mongoose';
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import redis from 'redis';
 import { SFUstart } from './socket/SFU';
-import { SFUstart as sf } from './socket/SFUserver';
-
 import config from 'config';
 
 

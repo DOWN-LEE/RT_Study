@@ -46,7 +46,7 @@ const UserVideo = (props: userVideoApp) => {
                     style={{visibility: props.userVideo.videoOn? 'hidden' : 'visible'}}
                    
                     className='user_photo'
-                    src='/img/person.jpg'
+                    src='/img/black.png'
                 />
                 
             </div>

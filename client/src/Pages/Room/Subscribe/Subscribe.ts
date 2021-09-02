@@ -67,7 +67,6 @@ export class Subsribe {
         const videoIds = otherProducers.VideoIds;
         const audioIds = otherProducers.AudioIds;
         const Members = otherProducers.Members;
-        console.log("################", Members);
         console.log('otherProducers', otherProducers);
 
         videoIds.forEach((vid: any) => {

@@ -269,7 +269,8 @@ export function run(app: express.Application){
         socket.on('myVideoOff', (data: any, callback: any) => {
             const roomname = getRoomname();
             const producer = getProducer(roomname, socket.id, 'video');
-            if(!producer.paused){
+
+            if(producer && !producer.paused){
                 producer.pause();
             }
             socket.broadcast.to(roomname).emit('producerVideoOff', { 
@@ -280,7 +281,7 @@ export function run(app: express.Application){
         socket.on('myVideoOn', (data: any, callback: any) => {
             const roomname = getRoomname();
             const producer = getProducer(roomname, socket.id, 'video');
-            if(producer.paused){
+            if(producer && producer.paused){
                 producer.resume();
             }
             socket.broadcast.to(roomname).emit('producerVideoOn', { 
@@ -291,7 +292,7 @@ export function run(app: express.Application){
         socket.on('myAudioOff', (data: any, callback: any) => {
             const roomname = getRoomname();
             const producer = getProducer(roomname, socket.id, 'audio');
-            if(!producer.paused){
+            if(producer && !producer.paused){
                 producer.pause();
             }
             socket.broadcast.to(roomname).emit('producerAudioOff', { 
@@ -302,7 +303,7 @@ export function run(app: express.Application){
         socket.on('myAudioOn', (data: any, callback: any) => {
             const roomname = getRoomname();
             const producer = getProducer(roomname, socket.id, 'audio');
-            if(producer.paused){
+            if(producer && producer.paused){
                 producer.resume();
             }
             socket.broadcast.to(roomname).emit('producerAudioOn', { 

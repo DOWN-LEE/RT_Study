@@ -23,11 +23,11 @@
 .my_photo{
     background-color: black;
     width: 100%;
-    height: 101%;
+    height: 99%;
     margin-top: 10vh;
     margin-left: 10vw;
     position: relative;
-    top: -71vh
+    top: -70.5vh
 }
 
 .my_buttons{
