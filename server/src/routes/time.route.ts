@@ -5,7 +5,7 @@ import TimeController from '../controllers/time.controller';
 
 
 class TimeRoute implements Routes {
-    public path = '/time/';
+    public path = '/api/time/';
     public router = Router();
     public timeController = new TimeController();
 

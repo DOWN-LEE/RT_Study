@@ -5,7 +5,7 @@ import RoomController from '../controllers/room.controller';
 
 
 class RoomRoute implements Routes {
-    public path = '/room/';
+    public path = '/api/room/';
     public router = Router();
     public roomController = new RoomController();
 

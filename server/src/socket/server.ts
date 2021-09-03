@@ -21,13 +21,13 @@ export function run(app: express.Application){
     if(serverOptions.useHttps) {
         // TODO HTTPS
     } else {
-        server = http.createServer(app).listen(serverOptions.listenPort, function () {
-            console.log('Web server start. http://' + serverOptions.hostName + ':' + serverOptions.listenPort + '/');
-        });
+        server = http.createServer(app);
     }
+
+    app.set('server', server);
     
-    const io = new Server(server, {path : '/server'});
-    app.set('io', io);
+    const io = new Server(server, {path : '/socket'});
+
     console.log('socket.io server start. port=' + serverOptions.listenPort);
 
     io.on('connection', (socket: any) => {

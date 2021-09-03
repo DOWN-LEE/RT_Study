@@ -15,11 +15,11 @@ export class SocketConnect {
     constructor(url: string, user:any) {
         const serverUrl = `http://${hostname}:${hostport}`;
         const opts = {
-            path: '/server',
+            path: '/socket',
             transports: ['websocket'],
         };
         this.user = user;
-        this.socket = io(serverUrl, opts);
+        this.socket = io('/', opts);
         this.roomUrl = url;
     }
 

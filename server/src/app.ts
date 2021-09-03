@@ -12,7 +12,7 @@ import config from 'config';
 
 class App{
     public app: express.Application;
-    public port: string | number;
+    public port: string | number = 3001;
 
     constructor(routes: Routes[]) {
         this.app = express();
@@ -26,8 +26,12 @@ class App{
     }
 
     public listen() {
-        this.app.listen(this.port, () => {
-            console.log('listen start')
+        // this.app.listen(this.port, () => {
+        //     console.log('listen start')
+        // });
+        const serverOptions: any = config.get('SFUoptions');
+        this.app.get('server').listen(serverOptions.listenPort, function () {
+            console.log('Web server start. port: ' + serverOptions.listenPort);
         });
     }
 
