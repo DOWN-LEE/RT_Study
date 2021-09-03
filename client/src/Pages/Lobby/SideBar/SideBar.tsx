@@ -249,7 +249,7 @@ const SideBar = () => {
             {userInfo()}
 
             <div className='rankBox'>
-                오늘의 공부왕
+                오늘의 공부순위
                 <TableContainer component={Paper}>
                     <Table className={classes.table}>
                         <TableHead>

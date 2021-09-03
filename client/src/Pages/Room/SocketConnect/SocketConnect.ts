@@ -31,7 +31,7 @@ export class SocketConnect {
         return new Promise((resolve, reject) => {
            
             this.socket.on('connect', () => {
-                this.sendRequest('userEmail', {email: this.user.email})
+                //this.sendRequest('userEmail', {email: this.user.email})
 
             });
 

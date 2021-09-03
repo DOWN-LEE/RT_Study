@@ -3,6 +3,7 @@ import { Device, types as mediaSoupTypes } from "mediasoup-client";
 import { Socket } from "socket.io-client";
 import { SocketConnect } from '../SocketConnect/SocketConnect';
 
+
 export class Publish {
     public device: Device;
     public producerTransport!: mediaSoupTypes.Transport;
@@ -86,7 +87,9 @@ export class Publish {
                 }
             });
 
-
+            
+            
+            
             const videoTrack = this.localStream.getVideoTracks()[0];
             if (videoTrack) {
                 const trackParams = { track: videoTrack };
@@ -101,7 +104,7 @@ export class Publish {
             }
         }
         catch (error) {
-            
+            throw('웹캠 or 마이크가 필요합니다!')
         }
 
     }

@@ -76,6 +76,15 @@ const Room1 = (props: app) => {
     useEffect(() => {  
         if(loggingIn == undefined)
             dispatch(checkLogin());
+
+        return () => {
+            if(publish && publish.localStream) {
+                const tracks = publish.localStream.getTracks();
+                tracks.forEach(t => {
+                    t.stop();
+                })
+            }
+        }
     },[]);
     
 
@@ -112,7 +121,7 @@ const Room1 = (props: app) => {
                 setDeviceReady(true);
 
                 socketConnect.socket.on('newConnection', () => {
-                    socketConnect.socket.close();
+                    
                     errorModal("새로운 접속이 감지됐습니다.")
                 });
             }
@@ -132,7 +141,10 @@ const Room1 = (props: app) => {
             setSubReady(true);
 
             publish = new Publish(device, socketConnect, localVideoRef);
-            publish.publish(true, true);
+            publish.publish(true, true)
+                .catch((error: any) => {
+                    errorModal(error);
+                });
         }
     },[deviceReady])
 
@@ -153,7 +165,9 @@ const Room1 = (props: app) => {
 
 
     const backClick = () => {
-        socketConnect.socket.close();
+        if(socketConnect && socketConnect.socket){
+            socketConnect.socket.close();
+        }
         props.history.push('/');
     }
 
@@ -173,7 +187,29 @@ const Room1 = (props: app) => {
     const errorModal = (message: string) => {
         setModalMesg(message);
         setWrongModal(true);
+        if(socketConnect && socketConnect.socket){
+            socketConnect.socket.close();
+        }
     }
+
+    const editVideoAudio = (op: string) => {
+        if(!(publish && publish.localStream)){
+            return;
+        }
+        if(op == 'videoOn' && publish.localStream.getVideoTracks()[0]){
+            publish.localStream.getVideoTracks()[0].enabled = true;
+        }
+        if(op == 'videoOff' && publish.localStream.getVideoTracks()[0]){
+            publish.localStream.getVideoTracks()[0].enabled = false;
+        }
+        if(op == 'audioOn' && publish.localStream.getAudioTracks()[0]){
+            publish.localStream.getAudioTracks()[0].enabled = true;
+        }
+        if(op == 'audioOff' && publish.localStream.getAudioTracks()[0]){
+            publish.localStream.getAudioTracks()[0].enabled = false;
+        }
+    }
+
 
     if(loggingIn)
         return(
@@ -185,7 +221,7 @@ const Room1 = (props: app) => {
                     
 
 
-                    <MyVideo localVideoRef={localVideoRef}/>
+                    <MyVideo localVideoRef={localVideoRef} editVideoAudio={editVideoAudio}/>
 
                     <div className='user_zone'>
                         <div className='user_vidoes'>

@@ -117,11 +117,13 @@ const MyVideo = (props: any) => {
 
         if(myVideoOn){
             socketConnect.sendRequest('myVideoOff', {});
+            props.editVideoAudio('videoOff');
             setTimerOn(false);
             clearInterval(studyTimer.current);
         }
         else{
             socketConnect.sendRequest('myVideoOn', {});
+            props.editVideoAudio('videoOn');
         }
         setMyVideoOn(!myVideoOn);
     }
@@ -129,9 +131,11 @@ const MyVideo = (props: any) => {
     const micIconClick = () => {
         if(myMicOn){
             socketConnect.sendRequest('myAudioOff', {});
+            props.editVideoAudio('audioOff');
         }
         else{
             socketConnect.sendRequest('myAudioOn', {});
+            props.editVideoAudio('audioOn');
         }
         setMyMicOn(!myMicOn);
     }
