@@ -10,7 +10,7 @@ services:
     #   - 80:80
     #   - 443:443
     volumes: 
-      - /home/down/docker/RT_Study/client/ssl:/etc/nginx/certs
+      - client/ssl:/etc/nginx/certs
     network_mode: host
     
   server:
