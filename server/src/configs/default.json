@@ -19,8 +19,8 @@
 
     "MediaWorkers" : 2,
 
-    "listenIp" : "127.0.0.1",
-    "announcedIp" : "127.0.0.1",
+    "listenIp" : "222.232.145.52",
+    "announcedIp" : "222.232.145.52",
 
     "key": "",
     "cert": ""
