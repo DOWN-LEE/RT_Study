@@ -13,7 +13,10 @@ export async function startWorkers() {
     }
 
     for (let i = 0; i < numWorkers; i++) {
-        const worker = await createWorker();
+        const worker = await createWorker({
+            rtcMaxPort: 10300,
+            rtcMinPort: 10000,
+        });
 
         worker.once('died', () => {
             console.error('worker::died [pide:%d] exiting in 2 seconds...', worker.pid);

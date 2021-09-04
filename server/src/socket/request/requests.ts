@@ -1,6 +1,6 @@
-import { createWorker, types as mediaSoupTypes } from 'mediasoup';
+import { types as mediaSoupTypes } from 'mediasoup';
 import { Room } from '../room/room';
-
+import config from 'config';
 
 export async function createTransport(roomname: string){
     const room = Room.getRoom(roomname);
@@ -229,7 +229,7 @@ export function getOhterMembers(roomname: string) {
 const WebRtcTransportOptions: mediaSoupTypes.WebRtcTransportOptions =
 {
     listenIps: [
-      { ip: '127.0.0.1', announcedIp: '127.0.0.1' }
+      { ip: config.get('listenIp'), announcedIp: config.get('announcedIp') }
     ],
     enableUdp: true,
     enableTcp: true,

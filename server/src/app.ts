@@ -12,11 +12,10 @@ import config from 'config';
 
 class App{
     public app: express.Application;
-    public port: string | number = 3001;
+    
 
     constructor(routes: Routes[]) {
         this.app = express();
-        this.port = 3001;
         
         this.connectToDatabase();
         this.initializeMiddlewares();

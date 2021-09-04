@@ -17,7 +17,12 @@
         "useHttps": false
     },
 
-    "MediaWorkers" : 2
+    "MediaWorkers" : 2,
 
+    "listenIp" : "127.0.0.1",
+    "announcedIp" : "127.0.0.1",
+
+    "key": "",
+    "cert": ""
     
 }

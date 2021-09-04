@@ -83,7 +83,12 @@ const Room1 = (props: app) => {
                 tracks.forEach(t => {
                     t.stop();
                 })
+            };
+
+            if(socketConnect && socketConnect.socket){
+                socketConnect.socket.close();
             }
+
         }
     },[]);
     
@@ -165,9 +170,9 @@ const Room1 = (props: app) => {
 
 
     const backClick = () => {
-        if(socketConnect && socketConnect.socket){
-            socketConnect.socket.close();
-        }
+        // if(socketConnect && socketConnect.socket){
+        //     socketConnect.socket.close();
+        // }
         props.history.push('/');
     }
 
@@ -187,9 +192,9 @@ const Room1 = (props: app) => {
     const errorModal = (message: string) => {
         setModalMesg(message);
         setWrongModal(true);
-        if(socketConnect && socketConnect.socket){
-            socketConnect.socket.close();
-        }
+        // if(socketConnect && socketConnect.socket){
+        //     socketConnect.socket.close();
+        // }
     }
 
     const editVideoAudio = (op: string) => {

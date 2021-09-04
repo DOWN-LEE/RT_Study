@@ -10,6 +10,7 @@ import { cleanUpPeer, createConsumer, createTransport, addConsumer, addConsumerT
 addProducer, addProducerTrasport, getConsumer, getConsumerTransport, getOtherProducers,
 getProducer, getProducerTrasnport, removeConsumer, removeConsumerSetDeep,removeProducer,
 removeConsumerTransport, removeProducerTransport, getOhterMembers } from './request/requests';
+import fs from 'fs';
 
 
 export function run(app: express.Application){
@@ -19,7 +20,9 @@ export function run(app: express.Application){
     const serverOptions: any = config.get('SFUoptions');
 
     if(serverOptions.useHttps) {
-        // TODO HTTPS
+        const key = fs.readFileSync(config.get('key'), 'utf8');
+        const cert = fs.readFileSync(config.get('cert'), 'utf8');
+        server = https.createServer({key: key, cert: cert}, app);
     } else {
         server = http.createServer(app);
     }
