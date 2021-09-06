@@ -15,7 +15,8 @@
 
 ## Implement
 ### Architecture
-![Frame 8](https://user-images.githubusercontent.com/59424336/127957448-9e15ef91-2ee7-44e4-bee7-c743198c033e.png)
+![image](https://user-images.githubusercontent.com/59424336/132169844-8e801894-7906-45db-ade9-cdb060b75b48.png)
+
 
 ### Backend
 #### tech stack
