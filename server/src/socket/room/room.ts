@@ -20,10 +20,11 @@ export class Room {
     Members: {[key: string]: string}; 
     date: string;
     router: mediaSoupTypes.Router | null;
+    workerNum: number
 
     static rooms = new Map<string, Room>();
 
-    constructor(name: string, url: string, hostEmail: string, limitMembers: number) {
+    constructor(name: string, url: string, hostEmail: string, limitMembers: number, workerIndex: number) {
         this.name = name;
         this.url = url;
         this.hostEmail = hostEmail;
@@ -37,6 +38,7 @@ export class Room {
         this.audioConsumerSets = new Map<string, Map<string, mediaSoupTypes.Consumer>>();
         this.Members = {};
         this.router = null;
+        this.workerNum = workerIndex;
     }
     
     // producer transport
@@ -250,8 +252,10 @@ export class Room {
 
 
 export async function setupRoom(name: string, url: string, hostEmail: string, limitMembers: number) {
-    const room = new Room(name, url, hostEmail, limitMembers);
-    const worker = getNextWorker();
+    
+    const workerInfo = getNextWorker();
+    const worker = workerInfo.worker;
+    const workerIndex = workerInfo.index;
     const router = await worker.createRouter({ mediaCodecs });
   
 
@@ -261,6 +265,8 @@ export async function setupRoom(name: string, url: string, hostEmail: string, li
     router.observer.on('newtransport', transport => {
         console.log('-- router newtransport. room=%s', name);
     });
+
+    const room = new Room(name, url, hostEmail, limitMembers, workerIndex);
 
     room.router = router;
     Room.addRoom(room, url);

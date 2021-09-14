@@ -220,7 +220,9 @@ export function getOhterMembers(roomname: string) {
 }
 
 
-
+export function getRooms() {
+    return Room.rooms
+}
 
 
 

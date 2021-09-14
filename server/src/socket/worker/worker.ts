@@ -1,7 +1,9 @@
 import { createWorker, types as mediaSoupTypes } from 'mediasoup';
 import config from 'config';
+import { getRooms } from '../request/requests';
 
-const workers = [];
+
+const workers: Array<mediaSoupTypes.Worker> = [];
 let nextWorkerIndex = 0;
 
 export async function startWorkers() {
@@ -37,12 +39,34 @@ export async function startWorkers() {
 
 export function getNextWorker() {
 
-    const worker = workers[nextWorkerIndex];
-    if (++nextWorkerIndex == workers.length) {
-        nextWorkerIndex = 0;
+
+    // 라운드 로빈
+
+    // const worker = workers[nextWorkerIndex];
+    // if (++nextWorkerIndex == workers.length) {
+    //     nextWorkerIndex = 0;
+    // }
+
+    // return worker;
+
+
+    // 최소 선택
+    let numWorker = new Array(workers.length).fill(0);
+    const rooms = getRooms();
+    rooms.forEach(room => {
+        numWorker[room.workerNum]++;
+    });
+
+    nextWorkerIndex = 0;
+    let minVal = numWorker[0];
+    for(let i=1; i < numWorker.length; i++){
+        if(minVal > numWorker[i]){
+            minVal = numWorker[i];
+            nextWorkerIndex = i;
+        }
     }
 
-    return worker;
+    return {worker: workers[nextWorkerIndex], index: nextWorkerIndex};
 };
 
 
