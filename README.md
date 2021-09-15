@@ -26,7 +26,7 @@ Typescript, Nodejs, socket, Mediasoup, Redis, MondoDB, Docker
 
 
 
-
+<br/><br/>
 ### Frontend
 #### tech stack
 Typescript, React, ReactHook, Webrtc, Mediasoup, socket, tensorflowJS, Docker
