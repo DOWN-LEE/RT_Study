@@ -2,15 +2,15 @@
 
 
 ## Planning reason and purpose
-- Studying in the reading room is burdensome in the Corona era, so i provide an environment where users can easily study with others at home and count pure study time
-- To understanding socket communication
-- Study and implement backend with typescript and nodejs
+- Studying at school or reading room is burdensome because of the corona virus, so i provide an environment where users can easily study with others at home and count pure study time
 
 
 ## Main function
-- 회원서비스 구현 및 자신의 공부 시간등 회원정보 제공
-- zoom처럼 외부 프로그램 설치없이 간편하게 웹 브라우저로 화상 통화 환경 제공
-- 자신의 화상 웹캠에서 얼굴이 인식되면 공부시간이 카운트되고 그렇지 않으면 공부시간이 카운트 되지않음
+- Full-stack development with Typescript-based React and Nodejs
+- I built sfu media server using open source mediasoup.
+- Face detection using TensorflowJS, measuring pure study time by stopping the timer when not sitting in front of the camera
+- Real-time study time ranking system implementation using Redis
+- Containerized with Docker so that it can be easily deployed regardless of OS or environment
 
 
 ## Implement
@@ -20,13 +20,7 @@
 
 ### Backend
 #### tech stack
-Typescript, Nodejs, socket, Mediasoup, Redis, mysql 
-
-#### function
-SFU server
-
-#### ERD
-
+Typescript, Nodejs, socket, Mediasoup, Redis, MondoDB, Docker
 
 
 
@@ -34,16 +28,7 @@ SFU server
 
 
 ### Frontend
-체험 : 
- 
 #### tech stack
-Typescript, React, ReactHook, Webrtc, Mediasoup, socket, tensorflowJS
+Typescript, React, ReactHook, Webrtc, Mediasoup, socket, tensorflowJS, Docker
 
-#### function
-채팅, 화상회의, 얼굴탐지, 시간 
-최근 공부시간, 매일 순위 
 
-#### 요소
-- Prelogin
-- Lobby
-- Room
