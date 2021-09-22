@@ -1,5 +1,5 @@
 # RT_Study
-## URL
+## DEMO URL
 www.rtstudy.site/  
 ID: test1@test.com ~ test9@test.com  
 PWD: 1234
