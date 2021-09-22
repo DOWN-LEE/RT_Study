@@ -1,5 +1,8 @@
 # RT_Study
-
+## URL
+www.rtstudy.site/
+ID: test1@test.com ~ test9@testc.om
+PWD: 1234
 
 ## Planning reason and purpose
 - Studying at school or reading room is burdensome because of the corona virus, so i provide an environment where users can easily study with others at home and count pure study time
